@@ -1,0 +1,29 @@
+Model Training and Evaluation Summary
+===================================
+
+Generated on: 2025-03-14 18:03:56
+
+Model Performance Summary:
+-------------------------
+                             completion_time  sequential      rmsd   success     multi  weighted_multi
+reconstruction_mse                  0.429489    0.769580  0.837289  0.820742  0.765512        0.884240
+completion_time_correlation         0.134919    0.375627  0.192465  0.185654  0.188349        0.290660
+trial_no_correlation               -0.038146   -0.053316 -0.046544 -0.038072 -0.033576       -0.043144
+rmsd_correlation                    0.062067    0.238287  0.092140  0.113714  0.113977        0.163918
+success_accuracy                    0.466694    0.339191  0.456886  0.466694  0.455251        0.360441
+completion_time_consistency         0.446488    0.359975  0.350721  0.453033  0.372129        0.357561
+trial_no_consistency                0.141198    0.141539  0.141992  0.140781  0.142775        0.141218
+rmsd_consistency                    0.010938    0.011140  0.011219  0.011721  0.011420        0.011142
+is_success_consistency              0.787004    0.719575  0.707642  0.820351  0.733878        0.719738
+
+Best Model by Metric:
+--------------------
+reconstruction_mse: weighted_multi (0.8842)
+completion_time_correlation: sequential (0.3756)
+trial_no_correlation: multi (-0.0336)
+rmsd_correlation: sequential (0.2383)
+success_accuracy: completion_time (0.4667)
+completion_time_consistency: success (0.4530)
+trial_no_consistency: multi (0.1428)
+rmsd_consistency: success (0.0117)
+is_success_consistency: success (0.8204)

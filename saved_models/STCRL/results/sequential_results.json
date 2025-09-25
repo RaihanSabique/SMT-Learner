@@ -1,0 +1,18 @@
+{
+    "reconstruction_mse": 0.09896299667644243,
+    "endpoint_error_mean": 0.01406173687428236,
+    "endpoint_error_std": 0.01761794090270996,
+    "path_length_error_mean": 6.459461212158203,
+    "path_length_error_std": 2.082472085952759,
+    "curvature_error_mean": 1.6748031377792358,
+    "curvature_error_std": 0.1380152553319931,
+    "completion_time_correlation": 0.3756274502941388,
+    "trial_no_correlation": -0.05331599654016249,
+    "rmsd_correlation": 0.2382865652361397,
+    "success_accuracy": 0.3391908459337965,
+    "completion_time_consistency": 0.3599752807425596,
+    "trial_no_consistency": 0.1415386011525583,
+    "rmsd_consistency": 0.011140151196751175,
+    "is_success_consistency": 0.7195749897834083,
+    "trajectory_shape_consistency": 0.763082006562821
+}

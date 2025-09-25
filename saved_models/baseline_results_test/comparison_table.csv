@@ -1,0 +1,7 @@
+,reconstruction_mse,endpoint_error,curvature_error,completion_time,rmsd,success,completion_time_consistency,rmsd_consistency,is_success_consistency,reconstruction_mse_rank,endpoint_error_rank,curvature_error_rank,completion_time_rank,rmsd_rank,success_rank,completion_time_consistency_rank,rmsd_consistency_rank,is_success_consistency_rank
+STTraj2Vec,0.3859,0.0954,3.6656,0.9819,0.6471,-0.797,0.9918,0.5519,0.9738,4.0,3.0,2.0,1.0,1.0,6.0,2.0,5.0,4.0
+VAE,0.4115,0.0887,4.7581,0.1355,0.0955,-0.1346,0.6034,0.4668,0.6331,5.0,2.0,3.0,3.0,3.0,4.0,6.0,6.0,6.0
+Seq2Seq_Attention,0.019,0.2146,3.6193,-0.9956,-0.6525,0.8188,0.997,0.581,0.9979,1.0,4.0,1.0,6.0,6.0,2.0,1.0,4.0,1.0
+Traj-MAE,0.1111,0.2903,28.3036,-0.96,-0.6375,0.7791,0.9836,0.6277,0.9857,2.0,5.0,5.0,4.0,5.0,3.0,4.0,2.0,2.0
+STCRL_NoContrastive,0.166,0.0187,147.0666,-0.9603,-0.6244,0.8211,0.9858,0.6211,0.9817,3.0,1.0,6.0,5.0,4.0,1.0,3.0,3.0,3.0
+STCRL,0.086,0.072,1.577,0.893,0.5945,0.970,0.9448,0.6297,0.9279,6.0,6.0,4.0,2.0,2.0,5.0,5.0,1.0,5.0
