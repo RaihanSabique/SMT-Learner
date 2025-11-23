@@ -13,7 +13,7 @@ import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import Dict, List, Tuple
-from DataProcessing.Normalization import normalize_trajectory_sequence_3d
+from DataProcessing.Normalization import normalize_trajectory_sequence_3d, normalize_trajectory_sequence_3d_directionality
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -48,7 +48,9 @@ class AblationStudy:
             'use_success_loss': True,
             'use_dual_stream': True,
             'use_positional_encoding': True,
-            'use_metadata': True
+            'use_metadata': True,
+            'include_theta': False,
+            'include_rotation_angle': False
         }
         
         # 2. No temporal contrastive learning
@@ -59,7 +61,9 @@ class AblationStudy:
             'use_success_loss': False,
             'use_dual_stream': True,
             'use_positional_encoding': True,
-            'use_metadata': True
+            'use_metadata': True,
+            'include_theta': False,
+            'include_rotation_angle': False
         }
         
         # 3. Only completion time loss
@@ -70,7 +74,9 @@ class AblationStudy:
             'use_success_loss': False,
             'use_dual_stream': True,
             'use_positional_encoding': True,
-            'use_metadata': True
+            'use_metadata': True,
+            'include_theta': False,
+            'include_rotation_angle': False
         }
         
         # 4. Only RMSD loss
@@ -81,7 +87,9 @@ class AblationStudy:
             'use_success_loss': False,
             'use_dual_stream': True,
             'use_positional_encoding': True,
-            'use_metadata': True
+            'use_metadata': True,
+            'include_theta': False,
+            'include_rotation_angle': False
         }
         
         # 5. Only success loss
@@ -92,7 +100,9 @@ class AblationStudy:
             'use_success_loss': True,
             'use_dual_stream': True,
             'use_positional_encoding': True,
-            'use_metadata': True
+            'use_metadata': True,
+            'include_theta': False,
+            'include_rotation_angle': False
         }
         
         # 6. No metadata embedding
@@ -103,7 +113,9 @@ class AblationStudy:
             'use_success_loss': True,
             'use_dual_stream': True,
             'use_positional_encoding': True,
-            'use_metadata': False
+            'use_metadata': False,
+            'include_theta': False,
+            'include_rotation_angle': False
         }
         
         # 7. No positional encoding
@@ -114,7 +126,9 @@ class AblationStudy:
             'use_success_loss': True,
             'use_dual_stream': True,
             'use_positional_encoding': False,
-            'use_metadata': True
+            'use_metadata': True,
+            'include_theta': False,
+            'include_rotation_angle': False
         }
         
         # 8. Simple transformer (no dual stream)
@@ -125,9 +139,39 @@ class AblationStudy:
             'use_success_loss': True,
             'use_dual_stream': False,
             'use_positional_encoding': True,
-            'use_metadata': True
+            'use_metadata': True,
+            'include_theta': False,
+            'include_rotation_angle': False
         }
-        
+
+        # 9. Plus Theta (direction angle appended as channel)
+        models['Plus_Theta'] = {
+            'use_temporal_contrastive': True,
+            'use_completion_time_loss': True,
+            'use_rmsd_loss': True,
+            'use_success_loss': True,
+            'use_dual_stream': True,
+            'use_positional_encoding': True,
+            'use_metadata': True,
+            'include_theta': True,
+            'include_rotation_angle': False
+        }
+
+        # 10. Plus Theta + Rotation Angle
+        models['Plus_Theta_Rotation'] = {
+            'use_temporal_contrastive': True,
+            'use_completion_time_loss': True,
+            'use_rmsd_loss': True,
+            'use_success_loss': True,
+            'use_dual_stream': True,
+            'use_positional_encoding': True,
+            'use_metadata': True,
+            'include_theta': True,
+            'include_rotation_angle': True
+        }
+
+        # Return full set; augmentation will be applied only to +theta variants
+        print(f"Running ablations: {list(models.keys())}")
         return models
     
     def create_ablated_loss_function(self, ablation_config: Dict):
@@ -457,9 +501,9 @@ class AblationStudy:
         ablation_models = self.create_ablated_models(config)
         
         # Model configuration
-        model_config = {
+        # Base model config (input_dim will be set per ablation based on dataset)
+        base_model_config = {
             'seq_len': 512,
-            'input_dim': 3,
             'hidden_dim': config['hidden_dim'],
             'nhead': config['nhead'],
             'num_layers': config['num_layers']
@@ -469,7 +513,12 @@ class AblationStudy:
         
         for ablation_name, ablation_config in ablation_models.items():
             print(f"\n=== Training {ablation_name} ===")
-            
+            # Derive input_dim from a sample batch trajectory
+            sample_batch, _ = next(iter(train_loader))
+            input_dim = sample_batch.shape[2]
+            model_config = dict(base_model_config)
+            model_config['input_dim'] = input_dim
+
             # Create model and loss function
             model = self.create_ablated_model(ablation_config, model_config)
             loss_fn = self.create_ablated_loss_function(ablation_config)
@@ -703,12 +752,71 @@ def loadAndProcessDataset(data_path: str) -> pd.DataFrame:
     print("Loading dataset...")
     df = pd.read_csv(data_path)
     df['participant_id'], unique_participants = pd.factorize(df['participant_id'])
-    df["normalized_trajectory"] = df.apply(
-        lambda x: normalize_trajectory_sequence_3d(x['path'], x['time_diff_ms']), axis=1)
+    # Baseline canonical normalization (3 channels: x,y,t)
+    # df["normalized_trajectory"] = df.apply(
+    #     lambda x: normalize_trajectory_sequence_3d(x['path'], x['time_diff_ms']), axis=1)
     # df = df[:2400]
+    dir_meta_series = df.apply(
+        lambda x: normalize_trajectory_sequence_3d_directionality(x['path'], x['time_diff_ms']), axis=1)
+    dir_meta_df = pd.DataFrame(dir_meta_series.tolist())
+    # Store normalized trajectory as list-of-lists for safe CSV round-trip
+    df['normalized_trajectory'] = dir_meta_df['normalized_trajectory'].apply(
+        lambda a: a.tolist() if isinstance(a, np.ndarray) else a)
+    df['original_target_angle'] = dir_meta_df['original_target_angle']
+    df['rotation_angle'] = dir_meta_df['rotation_angle']
+    df['original_end_vector'] = dir_meta_df['original_end_vector'].apply(
+        lambda v: v.tolist() if isinstance(v, np.ndarray) else v)
     print("Data loaded successfully")
     print(df.head(5))
     return df
+
+def augment_df_with_direction_features(df: pd.DataFrame, include_theta: bool, include_rotation_angle: bool) -> pd.DataFrame:
+    """Return a copy of df with augmented per-step channels: +theta or +theta+rotation.
+    The base df must already have 'path' and 'time_diff_ms'.
+    """
+    if not include_theta and not include_rotation_angle:
+        return df  # no change required
+
+    augmented_rows = []
+    for _, row in df.iterrows():
+        try:
+            meta = normalize_trajectory_sequence_3d_directionality(row['path'], row['time_diff_ms'])
+            traj = meta.get('normalized_trajectory', np.array([]))
+
+            # Coerce to 2D (L,3); handle empty or 1D arrays gracefully
+            traj = np.array(traj)
+            if traj.ndim == 1:
+                if traj.size == 0:
+                    # Skip rows with no valid trajectory
+                    continue
+                # Attempt reshape if it's a flat multiple of 3
+                if traj.size % 3 == 0:
+                    traj = traj.reshape(-1, 3)
+                else:
+                    continue
+            if traj.shape[0] == 0 or traj.shape[1] < 3:
+                continue
+
+            L = traj.shape[0]
+            channels = [traj]
+            if include_theta:
+                theta = float(meta.get('original_target_angle', 0.0))
+                theta_col = np.full((L, 1), theta, dtype=traj.dtype)
+                channels.append(theta_col)
+            if include_rotation_angle:
+                rot_angle = float(meta.get('rotation_angle', 0.0))
+                rot_col = np.full((L, 1), rot_angle, dtype=traj.dtype)
+                channels.append(rot_col)
+
+            augmented_traj = np.concatenate(channels, axis=1)
+            # Preserve original metadata columns plus new trajectory
+            new_row = row.copy()
+            new_row['normalized_trajectory'] = augmented_traj
+            augmented_rows.append(new_row)
+        except Exception:
+            # Skip problematic rows to keep the pipeline robust
+            continue
+    return pd.DataFrame(augmented_rows)
 
 def run_ablation_study_main(data_path: str = None, 
                            config: Dict = None,
@@ -765,34 +873,72 @@ def run_ablation_study_main(data_path: str = None,
     print("Training Data: \n", train_df.head(5))
     print(f"Data splits - Train: {len(train_df)}, Val: {len(val_df)}, Test: {len(test_df)}")
     
-    # Create datasets and loaders
-    train_dataset = STCRLModelFittingDataset(train_df)
-    val_dataset = STCRLModelFittingDataset(val_df)
-    test_dataset = STCRLModelFittingDataset(test_df)
-    
-    train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=config['batch_size'], shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=config['batch_size'], shuffle=False)
-    
-    # Extract metadata
-    metadata = {}
-    for key in ['completion_time', 'rmsd', 'is_success', 'task_type', 'participant_id']:
-        metadata[key] = []
-        for i in range(len(test_dataset)):
-            _, temporal_data = test_dataset[i]
-            if key in temporal_data:
-                value = temporal_data[key]
-                if torch.is_tensor(value):
-                    value = value.item()
-                metadata[key].append(value)
-        metadata[key] = np.array(metadata[key])
-    
-    # Run ablation study
+    # We'll build loaders per ablation variant to allow dynamic channel counts
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     
     ablation_study = AblationStudy(device)
-    results = ablation_study.run_ablation_study(train_loader, val_loader, test_loader, metadata, config)
+    ablation_configs = ablation_study.create_ablated_models(config)
+    results = {}
+
+    for ablation_name, ab_cfg in ablation_configs.items():
+        print(f"\nPreparing data for ablation: {ablation_name}")
+
+        include_theta = ab_cfg.get('include_theta', False)
+        include_rotation = ab_cfg.get('include_rotation_angle', False)
+
+        # Only augment for newly added directionality ablations; otherwise use original frames
+        if include_theta or include_rotation:
+            aug_train_df = augment_df_with_direction_features(train_df, include_theta, include_rotation)
+            aug_val_df = augment_df_with_direction_features(val_df, include_theta, include_rotation)
+            aug_test_df = augment_df_with_direction_features(test_df, include_theta, include_rotation)
+
+            # Fallback: if augmentation produced empty frames, revert to un-augmented
+            if len(aug_train_df) == 0 or 'normalized_trajectory' not in aug_train_df.columns:
+                print(f"[Warn] Augmentation yielded empty/invalid data for {ablation_name}. Reverting to baseline features.")
+                aug_train_df, aug_val_df, aug_test_df = train_df, val_df, test_df
+        else:
+            aug_train_df, aug_val_df, aug_test_df = train_df, val_df, test_df
+
+        print(f"Train/Val/Test sizes: {len(aug_train_df)}/{len(aug_val_df)}/{len(aug_test_df)}")
+
+        # Create datasets/loaders
+        train_dataset = STCRLModelFittingDataset(aug_train_df)
+        val_dataset = STCRLModelFittingDataset(aug_val_df)
+        test_dataset = STCRLModelFittingDataset(aug_test_df)
+
+        train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True)
+        val_loader = DataLoader(val_dataset, batch_size=config['batch_size'], shuffle=False)
+        test_loader = DataLoader(test_dataset, batch_size=config['batch_size'], shuffle=False)
+
+        # Extract metadata from test set
+        metadata = {}
+        for key in ['completion_time', 'rmsd', 'is_success', 'task_type', 'participant_id']:
+            metadata[key] = []
+            for i in range(len(test_dataset)):
+                _, temporal_data = test_dataset[i]
+                if key in temporal_data:
+                    value = temporal_data[key]
+                    if torch.is_tensor(value):
+                        value = value.item()
+                    metadata[key].append(value)
+            metadata[key] = np.array(metadata[key])
+
+        # Build model_config dynamically based on dataset input dim
+        model_config = {
+            'seq_len': 512,
+            'input_dim': train_dataset.get_input_dim(),
+            'hidden_dim': config['hidden_dim'],
+            'nhead': config['nhead'],
+            'num_layers': config['num_layers']
+        }
+
+        loss_fn = ablation_study.create_ablated_loss_function(ab_cfg)
+        model = ablation_study.create_ablated_model(ab_cfg, model_config)
+        trained_model, _ = ablation_study.train_ablated_model(model, loss_fn, train_loader, val_loader, config)
+        eval_results = ablation_study.evaluate_ablated_model(trained_model, test_loader, metadata)
+        results[ablation_name] = eval_results
+        print(f"Results for {ablation_name}: {eval_results}")
     
     # Create visualizations
     print("\n=== Creating Ablation Study Visualizations ===")

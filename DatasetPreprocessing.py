@@ -1,8 +1,9 @@
 
 from DataProcessing.DatasetCombining import combine_csv_files
 from DataProcessing.Preprocessing import Preprocessing
-from DataProcessing.Normalization import normalize_trajectory_sequence_3d
+from DataProcessing.Normalization import normalize_trajectory_sequence_3d, normalize_trajectory_sequence_3d_directionality
 import pandas as pd
+import numpy as np
 
 if __name__ == '__main__':
     selected_columns = {
@@ -30,8 +31,17 @@ if __name__ == '__main__':
     save_path = 'Dataset/SMT_Dataset/'
     preprocessing = Preprocessing(data_path=data_path)
     dataset = preprocessing.getPreprocessedData()
+    dir_meta_series = dataset.apply(
+        lambda x: normalize_trajectory_sequence_3d_directionality(x['path'], x['time_diff_ms']), axis=1)
+    dir_meta_df = pd.DataFrame(dir_meta_series.tolist())
+    dataset['normalized_trajectory'] = dir_meta_df['normalized_trajectory'].apply(
+        lambda a: a.tolist() if isinstance(a, np.ndarray) else a)
+    dataset['original_target_angle'] = dir_meta_df['original_target_angle']
+    dataset['rotation_angle'] = dir_meta_df['rotation_angle']
+    dataset['original_end_vector'] = dir_meta_df['original_end_vector'].apply(
+        lambda v: v.tolist() if isinstance(v, np.ndarray) else v)
     dataset["normalized_trajectory"] = dataset.apply(
         lambda x: normalize_trajectory_sequence_3d(x['path'], x['time_diff_ms']), axis=1)
     print(dataset.head(10))
-    dataset.to_csv(save_path + 'preprocessed_human_smt_dataset.csv', index=False)
+    dataset.to_csv(save_path + 'preprocessed_human_smt_dataset_updated.csv', index=False)
 
