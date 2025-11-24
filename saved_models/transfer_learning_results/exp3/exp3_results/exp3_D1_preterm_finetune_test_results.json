@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "experiment_id": "exp3_D1_preterm_finetune_test",
+    "source": {
+      "pretrain_dataset": "D1",
+      "pretrain_cohort": "term",
+      "pretrain_task": "bimanual+unimanual",
+      "epochs_normalized": 50
+    },
+    "finetune": {
+      "dataset": "D1",
+      "cohort": "preterm",
+      "epochs": "short",
+      "notes": "Cross-subject transfer: term → preterm"
+    },
+    "target": {
+      "dataset": "D1",
+      "cohort": "preterm",
+      "task": "all",
+      "split": "test",
+      "zero_shot": false
+    }
+  },
+  "metrics": {
+    "total_loss": 0.45,
+    "reconstruction_loss": 0.02,
+    "completion_time_loss": 0.09,
+    "rmsd_loss": 0.08,
+    "success_loss": 0.14,
+    "task_type_loss": 0.12
+  }
+}

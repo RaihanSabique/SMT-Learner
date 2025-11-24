@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "experiment_id": "exp2_D1_bimanual_test",
+    "source": {
+      "pretrain_dataset": "D1",
+      "pretrain_task": "unimanual",
+      "epochs_normalized": 50
+    },
+    "target": {
+      "dataset": "D1",
+      "task": "bimanual",
+      "split": "test",
+      "zero_shot": false
+    }
+  },
+  "metrics": {
+    "total_loss": 0.55,
+    "reconstruction_loss": 0.02,
+    "completion_time_loss": 0.11,
+    "rmsd_loss": 0.10,
+    "success_loss": 0.17,
+    "task_type_loss": 0.15
+  }
+}

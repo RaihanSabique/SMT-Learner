@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "experiment_id": "exp3_D2_test_from_preterm_finetuned",
+    "source": {
+      "pretrain_dataset": "D1",
+      "pretrain_cohort": "term",
+      "pretrain_task": "bimanual+unimanual",
+      "epochs": 50
+    },
+    "finetune": {
+      "dataset": "D1",
+      "cohort": "preterm",
+      "epochs": "short"
+    },
+    "target": {
+      "dataset": "D2",
+      "task": "all_tasks",
+      "split": "test",
+      "zero_shot": true
+    }
+  },
+  "metrics": {
+    "total_loss": 1.18,
+    "reconstruction_loss": 0.055,
+    "completion_time_loss": 0.32,
+    "rmsd_loss": 0.28,
+    "success_loss": 0.29,
+    "task_type_loss": 0.235
+  }
+}
