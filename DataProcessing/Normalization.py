@@ -2,63 +2,16 @@ import numpy as np
 import ast
 
 
-    import ast
-    # Parse input trajectory
-    try:
-        if isinstance(path, str):
-            trajectory = np.array(ast.literal_eval(path))
-        else:
-            trajectory = np.array(path)
-    except Exception:
-        # Fallback: try eval as last resort
-        try:
-            trajectory = np.array(eval(path) if isinstance(path, str) else path)
-        except Exception:
-            trajectory = np.array([])
+def normalize_trajectory_3d(trajectory, time_sequence, target_position=np.array([1.0, 0.0])):
     """
-    # Parse time sequence (differences in ms)
-    try:
-        if isinstance(time_diff_ms, str):
-            time_sequence = np.array(ast.literal_eval(time_diff_ms))
-        else:
-            time_sequence = np.array(time_diff_ms)
-    except Exception:
-        try:
-            time_sequence = np.array(eval(time_diff_ms) if isinstance(time_diff_ms, str) else time_diff_ms)
-        except Exception:
-            time_sequence = None
+    Normalize trajectory spatially while preserving original time.
 
     Args:
         trajectory: numpy array of shape (num_points, 2) containing x,y coordinates
         time_sequence: numpy array of timestamps in milliseconds for each point
-        # Coerce trajectory to 2D (N,2) if flattened
-        if trajectory.ndim == 1 and trajectory.size % 2 == 0:
-            trajectory = trajectory.reshape(-1, 2)
-        # If trajectory has more than 2 columns, keep first two as spatial
-        if trajectory.ndim == 2 and trajectory.shape[1] > 2:
-            trajectory = trajectory[:, :2]
+        target_position: desired end position for all trajectories (default: [1,0])
 
-        # Build absolute time from diffs if available, else fallback to linspace
-        if time_sequence is None or not isinstance(time_sequence, np.ndarray) or time_sequence.size == 0:
-            time_abs = np.linspace(0, 1000.0, trajectory.shape[0])
-        else:
-            # If provided diffs length mismatches, pad/trim
-            diffs = time_sequence.astype(float).flatten()
-            if diffs.size == trajectory.shape[0]:
-                time_abs = diffs
-            else:
-                # If diffs are per-step (N-1), expand to N by prepending 0 and cumsum
-                if diffs.size == trajectory.shape[0] - 1:
-                    time_abs = np.cumsum(np.insert(diffs, 0, 0.0))
-                else:
-                    # Interpolate to match number of points
-                    t_src = np.linspace(0, 1, max(diffs.size, 2))
-                    t_dst = np.linspace(0, 1, trajectory.shape[0])
-                    diffs_interp = np.interp(t_dst, t_src, diffs)
-                    time_abs = np.cumsum(diffs_interp)
-
-        # Normalize to 3D with time in seconds
-        norm_traj_3d = normalize_trajectory_3d(trajectory, time_abs, target_position)
+    Returns:
         Normalized 3D trajectory (x, y, time_in_seconds)
     """
     # Convert time from milliseconds to seconds
@@ -210,3 +163,18 @@ def normalize_trajectory_sequence_3d_directionality(path, time_diff_ms, target_p
             'original_end_vector': original_vec
         }
     return traj_3d, original_target_angle, rotation_angle, original_vec
+
+def apply_normalization(row):
+    # Extract target position from row
+    target_pos = row['target_poisiton']
+    
+    # Create numpy array from path data
+    path_array = np.array(row['path'])
+    
+    # Create numpy array from time data
+    time_array = np.array(row['time_diff_ms'])
+    
+    # Normalize trajectory
+    return normalize_trajectory_sequence_3d(path_array, time_array, 
+                                           target_position=np.array([1.0, 0.0]),
+                                           target_length=512)
