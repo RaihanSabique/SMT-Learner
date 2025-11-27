@@ -1,0 +1,105 @@
+{
+  "sweep_rows": 1125,
+  "best_params_min": {
+    "alpha": 0.05,
+    "beta1": 0.1,
+    "beta2": 0.9,
+    "window": 120
+  },
+  "best_params_knn": {
+    "alpha": 0.05,
+    "beta1": 0.1,
+    "beta2": 0.9,
+    "window": 120
+  },
+  "clustering": [
+    {
+      "algo": "KMeans",
+      "k": 3,
+      "silhouette": 0.4788995075158015,
+      "mean_purity": 0.9624278390904298
+    },
+    {
+      "algo": "KMeans",
+      "k": 5,
+      "silhouette": 0.40540564212681895,
+      "mean_purity": 0.9823133482308872
+    },
+    {
+      "algo": "KMeans",
+      "k": 7,
+      "silhouette": 0.29019718342351025,
+      "mean_purity": 0.9712975639429166
+    },
+    {
+      "algo": "DBSCAN",
+      "eps": 0.5,
+      "silhouette": 0.3610612800294291,
+      "mean_purity": 1.0
+    },
+    {
+      "algo": "DBSCAN",
+      "eps": 1.0,
+      "silhouette": 0.6701523491150428,
+      "mean_purity": 0.9995473064735174
+    },
+    {
+      "algo": "DBSCAN",
+      "eps": 1.5,
+      "silhouette": 0.25324112439006835,
+      "mean_purity": 0.9982042072857876
+    }
+  ],
+  "fusion_metrics": [
+    {
+      "metric": "min_dist_rep",
+      "roc_auc": 0.5521340007532702,
+      "pr_auc": 0.5402893718248507,
+      "best_f1": 0.6994248562140535,
+      "alpha": 0.05,
+      "beta1": 0.1,
+      "beta2": 0.9,
+      "window": 120
+    },
+    {
+      "metric": "knn_avg_rep_minParams",
+      "roc_auc": 0.4961995950614445,
+      "pr_auc": 0.5026175791986723,
+      "best_f1": 0.692673168292073,
+      "alpha": 0.05,
+      "beta1": 0.1,
+      "beta2": 0.9,
+      "window": 120
+    },
+    {
+      "metric": "min_dist_rep_knnParams",
+      "roc_auc": 0.5521340007532702,
+      "pr_auc": 0.5402893718248507,
+      "best_f1": 0.6994248562140535,
+      "alpha": 0.05,
+      "beta1": 0.1,
+      "beta2": 0.9,
+      "window": 120
+    },
+    {
+      "metric": "knn_avg_rep",
+      "roc_auc": 0.4961995950614445,
+      "pr_auc": 0.5026175791986723,
+      "best_f1": 0.692673168292073,
+      "alpha": 0.05,
+      "beta1": 0.1,
+      "beta2": 0.9,
+      "window": 120
+    },
+    {
+      "metric": "fused_min_knn_cluster",
+      "roc_auc": 0.482194450426368,
+      "pr_auc": 0.4816271080831333,
+      "best_f1": 0.6780028340418438,
+      "alpha": 0.05,
+      "beta1": 0.1,
+      "beta2": 0.9,
+      "window": 120
+    }
+  ]
+}

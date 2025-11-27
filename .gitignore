@@ -39,11 +39,6 @@ ro3env/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Model files and results
-saved_models/
-*.pt
-*.pth
-*.h5
 
 # OS
 .DS_Store

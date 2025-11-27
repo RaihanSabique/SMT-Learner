@@ -33,7 +33,7 @@ class RunSTCRLTraining:
         df['participant_id'], unique_participants = pd.factorize(df['participant_id'])
         df["normalized_trajectory"] = df.apply(
             lambda x: normalize_trajectory_sequence_3d(x['path'], x['time_diff_ms']), axis=1)
-        df = df[:2400]
+        # df = df[:2400]
         print("Data loaded successfully")
         print(df.head(5))
         return df
