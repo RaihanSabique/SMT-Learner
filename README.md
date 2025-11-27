@@ -84,15 +84,14 @@ ct_model, ct_history, ct_results = runner.run_cross_task_transfer(
 
 STCRL is designed to work with 3D movement trajectory data collected during motor skill learning tasks. The expected data format includes:
 
-- **Trajectory Data**: 3D coordinates (x, y, t) sampled at regular intervals
-- **Task Metadata**: Task type, success status
+- **Trajectory Data**: 2D coordinates (x, y) and timestamp (t) sampled at regular intervals
+- **Task Metadata**: Task type, success status, RMSD, Completion Time
 - **Subject Information**: Participant ID for cross-subject analysis
-- **Performance Metrics**: RMSD (Root Mean Square Deviation), completion time
+- **Performance Metrics**: RMSD (Root Mean Square Deviation), completion time, success status
 
 **Dataset 1: Human Movement Data**
 
-Cassandra K. et al.  Motor Skill Learning in Young Children
-Born Preterm. May 2025. URL: [osf.io/w4r2f](osf.io/w4r2f)
+Publish with paper.
 
 **Dataset 2: Monkey Hand Movement**
 
@@ -106,10 +105,9 @@ URL: [https://portal.nersc.gov/project/crcns/download/index.php](https://portal.
 
 ### Comprehensive Metrics
 
-- **Reconstruction Quality**: MSE, endpoint error, curvature analysis
-- **Temporal Consistency**: Completion time correlation, sequence alignment
-- **Subject Adaptation**: Cross-subject generalization, participant clustering
-- **Transfer Effectiveness**: Domain adaptation success, convergence speed
+- (i) **Trajectory reconstruction quality**: Reconstruction Mean Squared Error (rMSE), Mean Endpoint Error (Ep-Err), and Mean Curvature Error (Curve-Err).
+- (ii) **Statistical correlation with movement performance variables**: Completion time correlation (T-Corr; movement speed), correlation with root mean square deviation from the optimal path (R-Corr; movement accuracy), and correlation with successfully reaching the target (S-Corr; success prediction AUC).
+- (iii) **Clustering neighborhood consistency**: Trajectory shape consistency (Traj-C), cross-task consistency (Task-C), and cross-subject consistency (Sub-C).
 
 ## 📋 Requirements
 
