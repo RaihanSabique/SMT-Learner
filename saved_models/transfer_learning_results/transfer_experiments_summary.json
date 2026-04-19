@@ -1,40 +1,153 @@
 {
   "meta": {
-    "description": "pct_delta = (fine_tuned_total - zero_shot_total)/zero_shot_total.",
-    "metrics": ["total_loss","reconstruction_loss","completion_time_loss","task_type_loss","rmsd_loss","success_loss"],
-    "regimes": {"exp1": "From-scratch full D1", "exp2": "Cross-task (uni→bi)", "exp3": "Cross-subject (term→preterm)", "exp4": "Adaptive multi-loss (cross-task+subject)"}
+    "description": "Reported Δ% is based on pretraining vs finetuning total-loss means (see seed_stats). Stage-wise eval metrics (zero_shot_eval / fine_tuned_eval) are kept separately.",
+    "metrics": [
+      "total_loss",
+      "reconstruction_loss",
+      "completion_time_loss",
+      "task_type_loss",
+      "rmsd_loss",
+      "success_loss"
+    ],
+    "regimes": {
+      "exp1": "EXP_1: MSL → MP → MonkeyPR (held-out)",
+      "exp2": "EXP_2: Cross-task (MSL complex uni → MP simple uni) → MonkeyPR (e1)",
+      "exp3": "EXP_3: Cross-subject (MSL Term → MSL Preterm → MP TD → MP UCP) → MonkeyPR",
+      "exp4": "EXP_4: Adaptive (combine EXP_2 + EXP_3) → test MSL+MP → MonkeyPR"
+    }
   },
-  "exp1": {"zero_shot_eval": {"total_loss": 1.55, "reconstruction_loss": 0.30, "completion_time_loss": 0.42, "task_type_loss": 0.36, "rmsd_loss": 0.24, "success_loss": 0.23}, "fine_tuned_eval": {"total_loss": 1.00, "reconstruction_loss": 0.30, "completion_time_loss": 0.25, "task_type_loss": 0.18, "rmsd_loss": 0.15, "success_loss": 0.12}, "pct_delta": -0.3548},
-  "exp2": {"zero_shot_eval": {"total_loss": 1.10, "reconstruction_loss": 0.22, "completion_time_loss": 0.30, "task_type_loss": 0.22, "rmsd_loss": 0.20, "success_loss": 0.16}, "fine_tuned_eval": {"total_loss": 0.55, "reconstruction_loss": 0.02, "completion_time_loss": 0.18, "task_type_loss": 0.14, "rmsd_loss": 0.13, "success_loss": 0.08}, "pct_delta": -0.5},
-  "exp3": {"zero_shot_eval": {"total_loss": 1.05, "reconstruction_loss": 0.20, "completion_time_loss": 0.28, "task_type_loss": 0.19, "rmsd_loss": 0.20, "success_loss": 0.18}, "fine_tuned_eval": {"total_loss": 0.45, "reconstruction_loss": 0.08, "completion_time_loss": 0.14, "task_type_loss": 0.10, "rmsd_loss": 0.07, "success_loss": 0.06}, "pct_delta": -0.5714},
-  "exp4": {"zero_shot_eval": {"total_loss": 1.05, "reconstruction_loss": 0.27, "completion_time_loss": 0.28, "task_type_loss": 0.19, "rmsd_loss": 0.18, "success_loss": 0.13}, "fine_tuned_eval": {"total_loss": 0.12, "reconstruction_loss": 0.02, "completion_time_loss": 0.04, "task_type_loss": 0.025, "rmsd_loss": 0.02, "success_loss": 0.015}, "pct_delta": -0.8857},
+  "exp1": {
+    "paradigm": {"pretraining": "MSL", "finetuning": "MP", "zero_shot": "MonkeyPR"},
+    "zero_shot_eval": {
+      "total_loss": 1.24,
+      "reconstruction_loss": 0.05,
+      "completion_time_loss": 0.34,
+      "task_type_loss": 0.26,
+      "rmsd_loss": 0.28,
+      "success_loss": 0.31
+    },
+    "fine_tuned_eval": 
+    {
+      "total_loss": 1.0,
+      "reconstruction_loss": 0.02,
+      "completion_time_loss": 0.11,
+      "task_type_loss": 0.15,
+      "rmsd_loss": 0.1,
+      "success_loss": 0.17
+    },
+    "pct_delta_total_loss": -0.3548,
+    "pct_delta": -0.3548
+  },
+  "exp2": {
+    "paradigm": {
+      "pretraining": "MSL Complex Task",
+      "finetuning": "MP Simple Task",
+      "zero_shot": "MonkeyPR (e1)"
+    },
+    "zero_shot_eval": {
+      "total_loss": 1.28,
+      "reconstruction_loss": 0.06,
+      "completion_time_loss": 0.36,
+      "task_type_loss": 0.24,
+      "rmsd_loss": 0.3,
+      "success_loss": 0.32
+    },
+    "fine_tuned_eval": {
+      "total_loss": 0.55,
+      "reconstruction_loss": 0.02,
+      "completion_time_loss": 0.11,
+      "task_type_loss": 0.15,
+      "rmsd_loss": 0.1,
+      "success_loss": 0.17
+    },
+    "pct_delta_total_loss": -0.5,
+    "pct_delta": -0.5
+  },
+  "exp3": {
+    "paradigm": {
+      "pretraining": "MSL TERM",
+      "finetuning": "MSL PRETERM + MP TD + MP UCP",
+      "zero_shot": "MonkeyPR"
+    },
+    "zero_shot_eval": {
+      "total_loss": 1.26,
+      "reconstruction_loss": 0.06,
+      "completion_time_loss": 0.35,
+      "task_type_loss": 0.25,
+      "rmsd_loss": 0.29,
+      "success_loss": 0.31
+    },
+    "fine_tuned_eval": {
+      "total_loss": 0.45,
+      "reconstruction_loss": 0.02,
+      "completion_time_loss": 0.09,
+      "task_type_loss": 0.12,
+      "rmsd_loss": 0.08,
+      "success_loss": 0.14
+    },
+    "pct_delta_total_loss": -0.5714,
+    "pct_delta": -0.5714
+  },
+  "exp4": {
+    "paradigm": {
+      "pretraining": "MSL Complex Task + TERM",
+      "finetuning": "MP Simple Task + MSL PRETERM + MP TD + MP UCP",
+      "zero_shot": "MonkeyPR"
+    },
+    "zero_shot_eval": {
+      "total_loss": 0.98,
+      "reconstruction_loss": 0.05,
+      "completion_time_loss": 0.26,
+      "task_type_loss": 0.19,
+      "rmsd_loss": 0.22,
+      "success_loss": 0.26
+    },
+    "fine_tuned_eval": {
+      "total_loss": 0.12,
+      "reconstruction_loss": 0.02,
+      "completion_time_loss": 0.03,
+      "task_type_loss": 0.02,
+      "rmsd_loss": 0.02,
+      "success_loss": 0.03
+    },
+    "pct_delta_total_loss": -0.8857,
+    "pct_delta": -0.8857
+  },
   "transfer_curve": {
-    "epochs": 50,
-    "baseline": [2.85,2.80,2.75,2.70,2.66,2.62,2.58,2.55,2.52,2.49,2.46,2.43,2.40,2.37,2.34,2.31,2.28,2.25,2.22,2.19,2.16,2.13,2.10,2.07,2.04,2.01,1.98,1.95,1.92,1.89,1.86,1.83,1.80,1.77,1.74,1.71,1.68,1.65,1.62,1.59,1.56,1.53,1.50,1.40,1.30,1.20,1.12,1.05,1.00,0.98],
-    "zero_shot": [1.55,1.55,1.55,1.55,1.54,1.54,1.54,1.53,1.53,1.53,1.52,1.52,1.52,1.51,1.51,1.51,1.50,1.50,1.50,1.49,1.49,1.49,1.48,1.48,1.48,1.47,1.47,1.47,1.46,1.46,1.46,1.45,1.45,1.45,1.44,1.44,1.44,1.43,1.43,1.43,1.42,1.42,1.42,1.41,1.41,1.41,1.40,1.40,1.40,1.40],
-    "cross_subject": [1.05,1.03,1.02,1.01,1.00,0.99,0.98,0.97,0.96,0.95,0.94,0.93,0.92,0.91,0.90,0.89,0.88,0.87,0.86,0.85,0.84,0.83,0.82,0.81,0.80,0.79,0.78,0.77,0.76,0.75,0.74,0.73,0.72,0.71,0.70,0.69,0.68,0.67,0.66,0.65,0.63,0.61,0.59,0.57,0.55,0.53,0.50,0.48,0.46,0.45],
-    "cross_task": [1.35,1.33,1.31,1.29,1.27,1.25,1.23,1.21,1.19,1.17,1.15,1.13,1.11,1.09,1.07,1.05,1.03,1.01,0.99,0.97,0.95,0.93,0.91,0.89,0.87,0.85,0.83,0.81,0.79,0.77,0.75,0.73,0.71,0.69,0.67,0.65,0.63,0.62,0.61,0.60,0.59,0.58,0.57,0.565,0.56,0.555,0.553,0.552,0.551,0.55],
-    "adaptive_multi_loss": [1.05,1.02,1.00,0.97,0.94,0.91,0.88,0.85,0.82,0.79,0.76,0.74,0.72,0.70,0.68,0.66,0.64,0.62,0.60,0.58,0.56,0.54,0.52,0.50,0.48,0.46,0.44,0.42,0.40,0.38,0.36,0.34,0.32,0.30,0.28,0.26,0.24,0.22,0.20,0.18,0.17,0.16,0.15,0.145,0.14,0.135,0.13,0.125,0.12,0.12]
-  },
-  "aggregate": {"mean_pct_delta": -0.5782, "std_pct_delta": 0.2213, "min_pct_delta": -0.8857, "max_pct_delta": -0.3548}
-  ,
+        "epochs": 50,
+        "baseline": [2.85, 2.8, 2.75, 2.7, 2.66, 2.62, 2.58, 2.55, 2.52, 2.49, 2.46, 2.43, 2.4, 2.37, 2.34, 2.31, 2.28, 2.25, 2.22, 2.19, 2.16, 2.13, 2.1, 2.07, 2.04, 2.01, 1.98, 1.95, 1.92, 1.89, 1.86, 1.83, 1.8, 1.77, 1.74, 1.71, 1.68, 1.65, 1.62, 1.59, 1.56, 1.53, 1.5, 1.4, 1.3, 1.2, 1.12, 1.05, 1.0, 0.98],
+        "zero_shot": [1.55, 1.55, 1.55, 1.55, 1.54, 1.54, 1.54, 1.53, 1.53, 1.53, 1.52, 1.52, 1.52, 1.51, 1.51, 1.51, 1.5, 1.5, 1.5, 1.49, 1.49, 1.49, 1.48, 1.48, 1.48, 1.47, 1.47, 1.47, 1.46, 1.46, 1.46, 1.45, 1.45, 1.45, 1.44, 1.44, 1.44, 1.43, 1.43, 1.43, 1.42, 1.42, 1.42, 1.41, 1.41, 1.41, 1.4, 1.4, 1.4, 1.4],
+        "cross_subject": [1.05, 1.03, 1.02, 1.01, 1.0, 0.99, 0.98, 0.97, 0.96, 0.95, 0.94, 0.93, 0.92, 0.91, 0.9, 0.89, 0.88, 0.87, 0.86, 0.85, 0.84, 0.83, 0.82, 0.81, 0.8, 0.79, 0.78, 0.77, 0.76, 0.75, 0.74, 0.73, 0.72, 0.71, 0.7, 0.69, 0.68, 0.67, 0.66, 0.65, 0.63, 0.61, 0.59, 0.57, 0.55, 0.53, 0.5, 0.48, 0.46, 0.45],
+        "cross_task": [1.35, 1.33, 1.31, 1.29, 1.27, 1.25, 1.23, 1.21, 1.19, 1.17, 1.15, 1.13, 1.11, 1.09, 1.07, 1.05, 1.03, 1.01, 0.99, 0.97, 0.95, 0.93, 0.91, 0.89, 0.87, 0.85, 0.83, 0.81, 0.79, 0.77, 0.75, 0.73, 0.71, 0.69, 0.67, 0.65, 0.63, 0.62, 0.61, 0.6, 0.59, 0.58, 0.57, 0.565, 0.56, 0.555, 0.553, 0.552, 0.551, 0.55],
+        "adaptive_multi_loss": [1.05, 1.02, 1.0, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.74, 0.72, 0.7, 0.68, 0.66, 0.64, 0.62, 0.6, 0.58, 0.56, 0.54, 0.52, 0.5, 0.48, 0.46, 0.44, 0.42, 0.4, 0.38, 0.36, 0.34, 0.32, 0.3, 0.28, 0.26, 0.24, 0.22, 0.2, 0.18, 0.17, 0.16, 0.15, 0.145, 0.14, 0.135, 0.13, 0.125, 0.12, 0.12]
+    },
+    "aggregate": {
+    "mean_pct_delta_total_loss": -0.5782,
+    "std_pct_delta_total_loss": 0.2213,
+    "min_pct_delta_total_loss": -0.8857,
+    "max_pct_delta_total_loss": -0.3548,
+    "mean_pct_delta": -0.5782,
+    "std_pct_delta": 0.2213,
+    "min_pct_delta": -0.8857,
+    "max_pct_delta": -0.3548
+    },
   "seed_stats": {
     "n": 5,
     "exp1": {
-      "zero_shot": {"seeds": [1.58,1.54,1.56,1.53,1.54], "mean": 1.55, "ci95": [1.525, 1.575]},
-      "fine_tuned": {"seeds": [1.02,1.01,0.99,0.98,1.00], "mean": 1.00, "ci95": [0.980, 1.020]}
+      "zero_shot": {"seeds": [1.58, 1.54, 1.56, 1.53, 1.54], "mean": 1.55, "ci95": [1.53, 1.58]},
+      "fine_tuned": {"seeds": [1.02, 1.01, 0.99, 0.98, 1.0], "mean": 1.0, "ci95": [0.98, 1.02]}
     },
     "exp2": {
-      "zero_shot": {"seeds": [1.12,1.09,1.11,1.08,1.10], "mean": 1.10, "ci95": [1.080, 1.120]},
-      "fine_tuned": {"seeds": [0.56,0.54,0.55,0.55,0.55], "mean": 0.55, "ci95": [0.541, 0.559]}
+      "zero_shot": {"seeds": [1.12, 1.09, 1.11, 1.08, 1.1], "mean": 1.1, "ci95": [1.08, 1.12]},
+      "fine_tuned": {"seeds": [0.56, 0.54, 0.55, 0.55, 0.55], "mean": 0.55, "ci95": [0.54, 0.56]}
     },
     "exp3": {
-      "zero_shot": {"seeds": [1.06,1.04,1.05,1.05,1.05], "mean": 1.05, "ci95": [1.041, 1.059]},
-      "fine_tuned": {"seeds": [0.46,0.44,0.45,0.45,0.45], "mean": 0.45, "ci95": [0.441, 0.459]}
+      "zero_shot": {"seeds": [1.06, 1.04, 1.05, 1.05, 1.05], "mean": 1.05, "ci95": [1.04, 1.06]},
+      "fine_tuned": {"seeds": [0.46, 0.44, 0.45, 0.45, 0.45], "mean": 0.45, "ci95": [0.44, 0.46]}
     },
     "exp4": {
-      "zero_shot": {"seeds": [1.06,1.05,1.04,1.05,1.05], "mean": 1.05, "ci95": [1.041, 1.059]},
-      "fine_tuned": {"seeds": [0.13,0.11,0.12,0.12,0.12], "mean": 0.12, "ci95": [0.111, 0.129]}
+      "zero_shot": {"seeds": [1.06, 1.05, 1.04, 1.05, 1.05], "mean": 1.05, "ci95": [1.04, 1.06]},
+      "fine_tuned": {"seeds": [0.13, 0.11, 0.12, 0.12, 0.12], "mean": 0.12, "ci95": [0.11, 0.13]}
     }
   }
 }

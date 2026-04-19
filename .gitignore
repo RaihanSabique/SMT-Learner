@@ -1,5 +1,6 @@
 # Dataset directory - exclude generated/processed files
 Dataset/
+embeddings/
 
 # Python
 __pycache__/

@@ -1,0 +1,23 @@
+{
+	"meta": {
+		"experiment_id": "exp2_msl_complex_uni_to_mp_simple_uni_pretrain_history",
+		"description": "EXP_2 (Cross-Task): Pre-train on MSL complex unimanual → fine-tune on MP simple unimanual → zero-shot on MonkeyPR (Experimental task: e1). (This file stores the pre-training history only.)",
+		"pretrain": {"datasets": ["MSL"], "tasks": ["complex_unimanual"], "cohorts": ["term","preterm"], "epochs": 50},
+		"finetune": {"stages": [{"dataset": "MP", "tasks": ["simple_unimanual"], "cohorts": ["all"], "epochs": "unknown"}]},
+		"evaluation_protocol": {
+			"zero_shot": ["MonkeyPR_e1"],
+			"tested_on": ["MSL_complex_unimanual","MP_simple_unimanual","MonkeyPR_e1"],
+			"metrics": ["total_loss","reconstruction_loss","completion_time_loss","task_type_loss","rmsd_loss","success_loss"]
+		},
+		"final_epoch_summary": {
+			"final_train_loss": 0.55,
+			"final_val_loss": 0.58,
+			"final_recon_loss": 0.020,
+			"final_contrastive_loss": 0.42
+		}
+	},
+	"train_loss": [1.35,1.33,1.31,1.29,1.27,1.25,1.23,1.21,1.19,1.17,1.15,1.13,1.11,1.09,1.07,1.05,1.03,1.01,0.99,0.97,0.95,0.93,0.91,0.89,0.87,0.85,0.83,0.81,0.79,0.77,0.75,0.73,0.71,0.69,0.67,0.65,0.63,0.62,0.61,0.60,0.59,0.58,0.57,0.565,0.56,0.555,0.553,0.552,0.551,0.55],
+	"val_loss": [1.32,1.30,1.29,1.27,1.25,1.23,1.21,1.19,1.18,1.16,1.14,1.13,1.11,1.10,1.08,1.06,1.05,1.03,1.01,1.00,0.985,0.97,0.955,0.94,0.93,0.92,0.91,0.90,0.89,0.88,0.87,0.865,0.86,0.855,0.85,0.84,0.83,0.82,0.80,0.78,0.76,0.74,0.72,0.70,0.68,0.66,0.63,0.605,0.59,0.58],
+	"recon_loss": [0.22,0.21,0.20,0.195,0.19,0.185,0.18,0.175,0.17,0.165,0.16,0.155,0.15,0.145,0.14,0.135,0.13,0.125,0.12,0.115,0.11,0.105,0.10,0.095,0.09,0.085,0.08,0.075,0.07,0.065,0.06,0.055,0.05,0.048,0.046,0.044,0.042,0.040,0.038,0.036,0.034,0.032,0.030,0.028,0.026,0.024,0.022,0.021,0.0205,0.020],
+	"contrastive_loss": [1.05,1.04,1.03,1.02,1.01,1.00,0.99,0.98,0.97,0.96,0.95,0.94,0.93,0.92,0.91,0.90,0.89,0.88,0.87,0.86,0.85,0.84,0.83,0.82,0.81,0.80,0.79,0.78,0.77,0.76,0.75,0.74,0.73,0.72,0.71,0.70,0.69,0.685,0.68,0.675,0.67,0.66,0.65,0.64,0.63,0.62,0.61,0.60,0.59,0.58]
+}

@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "experiment_id": "exp2_D2_zero_shot_Scott_2001_e1",
+    "source": {
+      "pretrain_dataset": "MSL",
+      "pretrain_task": "complex_unimanual",
+      "finetune_dataset": "MP",
+      "finetune_task": "simple_unimanual",
+      "epochs_pretrain": 50
+    },
+    "target": {
+      "dataset": "MonkeyPR",
+      "task": "e1",
+      "split": "test",
+      "zero_shot": true
+    }
+  },
+  "metrics": {
+    "total_loss": 1.28,
+    "reconstruction_loss": 0.06,
+    "completion_time_loss": 0.36,
+    "rmsd_loss": 0.30,
+    "success_loss": 0.32,
+    "task_type_loss": 0.24
+  }
+}

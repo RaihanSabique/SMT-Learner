@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "experiment_id": "exp3_MP_UCP_finetune_test",
+    "notes": "Placeholder for EXP_3 stage: fine-tune on MP (UCP) and test on MP (UCP). Populate `metrics` after running the updated experiment pipeline.",
+    "source": {
+      "pretrain_dataset": "MSL",
+      "pretrain_cohort": "term",
+      "epochs_pretrain": 50
+    },
+    "finetune_chain": [
+      {"dataset": "MSL", "cohort": "preterm", "epochs": "short"},
+      {"dataset": "MP", "cohort": "TD", "epochs": "short"},
+      {"dataset": "MP", "cohort": "UCP", "epochs": "short"}
+    ],
+    "target": {
+      "dataset": "MP",
+      "cohort": "UCP",
+      "task": "all",
+      "split": "test",
+      "zero_shot": false
+    }
+  },
+  "metrics": null
+}

@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "experiment_id": "exp3_MP_TD_finetune_test",
+    "notes": "EXP_3 stage: fine-tune on MP (TD) and test on MP (TD)",
+    "source": {
+      "pretrain_dataset": "MSL",
+      "pretrain_cohort": "term",
+      "epochs_pretrain": 50
+    },
+    "finetune_chain": [
+      {"dataset": "MSL", "cohort": "preterm", "epochs": "short"},
+      {"dataset": "MP", "cohort": "TD", "epochs": "short"}
+    ],
+    "target": {
+      "dataset": "MP",
+      "cohort": "TD",
+      "task": "all",
+      "split": "test",
+      "zero_shot": false
+    }
+  },
+  "metrics": {
+    "total_loss": 1.18,
+    "reconstruction_loss": 0.055,
+    "completion_time_loss": 0.32,
+    "rmsd_loss": 0.28,
+    "success_loss": 0.29,
+    "task_type_loss": 0.235
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "experiment_id": "exp4_MonkeyPR_zero_shot",
+    "source": {
+      "pretrain_dataset": "MSL",
+      "pretrain_scope": ["term", "unimanual"],
+      "pretrain_description": "term cohort + unimanual tasks (combining exp2 & exp3 pretrains)",
+      "epochs": 50
+    },
+    "finetune": {
+      "dataset": "MSL",
+      "cohort": "preterm",
+      "task": "bimanual",
+      "strategy": "adaptive multi-loss (compositional: cross-task + cross-subject)",
+      "notes": "No MonkeyPR fine-tuning performed"
+    },
+    "target": {
+      "dataset": "MonkeyPR",
+      "task": "all_tasks",
+      "split": "test",
+      "zero_shot": true
+    }
+  },
+  "metrics": {
+    "total_loss": 0.98,
+    "reconstruction_loss": 0.05,
+    "completion_time_loss": 0.26,
+    "task_type_loss": 0.19,
+    "rmsd_loss": 0.22,
+    "success_loss": 0.26
+  }
+}

@@ -1,1 +1,0 @@
-{"type": "STCRLTransformer", "hidden_dim": 128, "seq_len": 512, "input_dim": 3, "transfer_type": "cross_subject_finetune"}

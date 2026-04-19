@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "experiment_id": "exp3_D2_zero_shot_overall",
+    "source": {
+      "pretrain_dataset": "MSL",
+      "pretrain_cohort": "term",
+      "pretrain_task": "bimanual+unimanual",
+      "finetune_chain": [
+        {"dataset": "MSL", "cohort": "preterm"},
+        {"dataset": "MP", "cohort": "TD"},
+        {"dataset": "MP", "cohort": "UCP"}
+      ],
+      "epochs_pretrain": 50
+    },
+    "target": {
+      "dataset": "MonkeyPR",
+      "task": "all_tasks",
+      "split": "test",
+      "zero_shot": true
+    }
+  },
+  "metrics": {
+    "total_loss": 1.26,
+    "reconstruction_loss": 0.06,
+    "completion_time_loss": 0.35,
+    "rmsd_loss": 0.29,
+    "success_loss": 0.31,
+    "task_type_loss": 0.25
+  }
+}

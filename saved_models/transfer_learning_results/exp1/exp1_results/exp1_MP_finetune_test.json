@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "experiment_id": "exp1_MP_finetune_test",
+    "notes": "EXP_1 MP fine-tune+test results",
+    "source": {
+      "pretrain_dataset": "MSL",
+      "pretrain_task": "all",
+      "epochs_pretrain": 50
+    },
+    "finetune": {
+      "dataset": "MP",
+      "task": "all_tasks",
+      "epochs": "unknown"
+    },
+    "target": {
+      "dataset": "MP",
+      "task": "all_tasks",
+      "split": "test",
+      "zero_shot": false
+    }
+  },
+  "metrics": {
+    "total_loss": 1.0,
+    "reconstruction_loss": 0.02,
+    "completion_time_loss": 0.11,
+    "task_type_loss": 0.15,
+    "rmsd_loss": 0.1,
+    "success_loss": 0.17
+  }
+}

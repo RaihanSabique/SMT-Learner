@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "experiment_id": "exp1_MonkeyPR_zero_shot",
+    "source": {
+      "pretrain_dataset": "MSL",
+      "pretrain_task": "all",
+      "finetune_dataset": "MP",
+      "finetune_task": "all",
+      "epochs_pretrain": 50
+    },
+    "target": {
+      "dataset": "MonkeyPR",
+      "task": "all_tasks",
+      "split": "test",
+      "zero_shot": true
+    }
+  },
+  "metrics": {
+    "total_loss": 1.24,
+    "reconstruction_loss": 0.05,
+    "completion_time_loss": 0.34,
+    "rmsd_loss": 0.28,
+    "success_loss": 0.31,
+    "task_type_loss": 0.26
+  }
+}

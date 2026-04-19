@@ -15,7 +15,7 @@ SMT-Learner is a transformer-based framework that learns meaningful representati
 
 ## 🏗️ Architecture
 
-![STCRL Architecture](E-E_Analysis/plots/SMT-Learner.png)
+![STCRL Architecture](E-E_Analysis/plots/SMT-Learner-updated.png)
 
 
 ## 🚀 Quick Start
@@ -89,11 +89,13 @@ STCRL is designed to work with 3D movement trajectory data collected during moto
 - **Subject Information**: Participant ID for cross-subject analysis
 - **Performance Metrics**: RMSD (Root Mean Square Deviation), completion time, success status
 
-**Dataset 1: Human Movement Data**
+**Dataset 1: MSL - Unimanual Motor Skill Learning**
+
+**Dataset 2: MP - UCP Motor Performance Assessment**
 
 Publish with paper.
 
-**Dataset 2: Monkey Hand Movement**
+**Dataset 3: Monkey Hand Movement**
 
 Stephen H Scott et al. “Dissociation between hand motion and population vectors from neural activity in
 motor cortex”. In: Nature 413.6852 (2001), pp. 161–165.
@@ -107,7 +109,6 @@ URL: [https://portal.nersc.gov/project/crcns/download/index.php](https://portal.
 
 - (i) **Trajectory reconstruction quality**: Reconstruction Mean Squared Error (rMSE), Mean Endpoint Error (Ep-Err), and Mean Curvature Error (Curve-Err).
 - (ii) **Statistical correlation with movement performance variables**: Completion time correlation (T-Corr; movement speed), correlation with root mean square deviation from the optimal path (R-Corr; movement accuracy), and correlation with successfully reaching the target (S-Corr; success prediction AUC).
-- (iii) **Clustering neighborhood consistency**: Trajectory shape consistency (Traj-C), cross-task consistency (Task-C), and cross-subject consistency (Sub-C).
 
 ## 📋 Requirements
 

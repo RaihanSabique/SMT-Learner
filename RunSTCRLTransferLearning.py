@@ -25,7 +25,7 @@ def create_transfer_learning_pipeline(source_model_path, target_data_path, save_
 
 if __name__ == '__main__':
     source_model_path = "saved_models/STCRL/models/multi_model"
-    target_data_path = "Dataset/SMT_Dataset/human_trajectory_dataset.csv"
+    target_data_path = "Dataset/SMT_Dataset/mp_preprocessed_dataset.csv"
     save_dir = "saved_models/STCRL_transfer_learning/"
     # Initialize runner
     runner = STCRLTransferLearningRunner(source_model_path)

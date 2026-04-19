@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "experiment_id": "exp2_MP_simple_unimanual_finetune_test",
+    "source": {
+      "pretrain_dataset": "MSL",
+      "pretrain_task": "complex_unimanual",
+      "epochs_pretrain": 50
+    },
+    "target": {
+      "dataset": "MP",
+      "task": "simple_unimanual",
+      "split": "test",
+      "zero_shot": false
+    }
+  },
+  "metrics": {
+    "total_loss": 0.55,
+    "reconstruction_loss": 0.02,
+    "completion_time_loss": 0.11,
+    "rmsd_loss": 0.10,
+    "success_loss": 0.17,
+    "task_type_loss": 0.15
+  }
+}

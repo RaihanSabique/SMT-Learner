@@ -15,10 +15,10 @@ if __name__ == '__main__':
         'file2': ['participant_id', 'Age', 'Cohort', 'Gestational_Age']
     }
 
-    merged_data = combine_csv_files('Dataset/SMT_Dataset/human_trajectory_dataset.csv', 'Dataset/BehavioralData/R03_Behavioral_Data.csv',
+    merged_data = combine_csv_files('Dataset/MSL/msl_dataset.csv', 'Dataset/MSL/R03_Behavioral_Data.csv',
                                     selected_columns)
 
-    mabc_df = pd.read_csv("Dataset/BehavioralData/MABC.csv")
+    mabc_df = pd.read_csv("Dataset/MSL/MABC.csv")
     mabc = mabc_df[['participant_id', 'Total Test Score ', 'Standard Score ', 'Percentile Rank ']]
     mabc.columns = ['participant_id', 'mabc_total_test_score', 'mabc_standard_score', 'mabc_percentile']
     merged_data = pd.merge(merged_data, mabc,
@@ -43,5 +43,5 @@ if __name__ == '__main__':
     dataset["normalized_trajectory"] = dataset.apply(
         lambda x: normalize_trajectory_sequence_3d(x['path'], x['time_diff_ms']), axis=1)
     print(dataset.head(10))
-    dataset.to_csv(save_path + 'preprocessed_human_smt_dataset_updated.csv', index=False)
+    dataset.to_csv(save_path + 'msl_preprocessed_dataset_updated.csv', index=False)
 
