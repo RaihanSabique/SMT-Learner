@@ -1,0 +1,61 @@
+{
+  "source_tag": "oldmodel",
+  "ee_tables": [
+    "old_model_analysis/results/MSL_ee_table_oldmodel.csv",
+    "old_model_analysis/results/UCPMP_ee_table_oldmodel.csv"
+  ],
+  "n_participants": {
+    "MSL": 68,
+    "MP": 50
+  },
+  "config": {
+    "msl_macro_bin": 2,
+    "msl_micro_bin": 12,
+    "mp_macro_bin": 2,
+    "mp_micro_bin": 8,
+    "early_late_bin": 6,
+    "n_boot": 2000,
+    "boot_seed": 42,
+    "msl_trials_per_session": 24,
+    "msl_total_trials": 120,
+    "mp_trials_per_session": 48,
+    "mp_total_trials": 96
+  },
+  "rq1_significant": [
+    {
+      "dataset": "MSL",
+      "subset": "Unimanual (task_type=0)",
+      "metric": "speed",
+      "p": 0.006324847939159221
+    },
+    {
+      "dataset": "MSL",
+      "subset": "Unimanual (task_type=0)",
+      "metric": "rmsd_norm",
+      "p": 0.0014149771170744669
+    },
+    {
+      "dataset": "MSL",
+      "subset": "Bimanual (task_type=1)",
+      "metric": "ee_ratio",
+      "p": 0.03780713092999894
+    },
+    {
+      "dataset": "MP",
+      "subset": "all trials",
+      "metric": "speed",
+      "p": 0.002918431091187199
+    },
+    {
+      "dataset": "MP",
+      "subset": "all trials",
+      "metric": "ee_ratio",
+      "p": 0.029149235089166125
+    }
+  ],
+  "notes": [
+    "MonkeyPR panels from the original notebooks are omitted (dataset removed from the revision).",
+    "MSL uses Unimanual (task_type==0); the RQ1 table also reports Bimanual.",
+    "actual_dist merged from the raw Dataset CSVs; speed=actual_dist/completion_time, accuracy=rmsd/actual_dist."
+  ]
+}

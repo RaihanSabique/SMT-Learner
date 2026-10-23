@@ -1,5 +1,5 @@
 """
-Ablation study script for STCRL components
+Ablation study script for SMTLearner components
 Addresses reviewer concerns about the importance of each model component
 """
 
@@ -18,16 +18,16 @@ from DataProcessing.Normalization import normalize_trajectory_sequence_3d, norma
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from STCRL.STCRLDataset import STCRLModelFittingDataset
-from STCRL.TransformerEncoder import STCRLTransformer
-from STCRL.ContrastiveLossFunctions import MultiTemporalLoss
-from STCRL.TrainSTCRL import train_stcrl_model
-from STCRL.EvaluationFramework import EvaluationMetrics
+from SMTLearner.SMTLearnerDataset import SMTLearnerModelFittingDataset
+from SMTLearner.TransformerEncoder import SMTLearnerTransformer
+from SMTLearner.ContrastiveLossFunctions import MultiTemporalLoss
+from SMTLearner.TrainSMTLearner import train_smtlearner_model
+from SMTLearner.EvaluationFramework import EvaluationMetrics
 
 
 class AblationStudy:
     """
-    Comprehensive ablation study for STCRL components
+    Comprehensive ablation study for SMTLearner components
     """
     
     def __init__(self, device='cpu'):
@@ -36,12 +36,12 @@ class AblationStudy:
     
     def create_ablated_models(self, config: Dict):
         """
-        Create different ablated versions of STCRL
+        Create different ablated versions of SMTLearner
         """
         models = {}
         
-        # 1. Full STCRL model
-        models['Full_STCRL'] = {
+        # 1. Full SMTLearner model
+        models['Full_SMT_Learner'] = {
             'use_temporal_contrastive': True,
             'use_completion_time_loss': True,
             'use_rmsd_loss': True,
@@ -105,46 +105,10 @@ class AblationStudy:
             'include_rotation_angle': False
         }
         
-        # 6. No metadata embedding
-        models['No_Metadata'] = {
-            'use_temporal_contrastive': True,
-            'use_completion_time_loss': True,
-            'use_rmsd_loss': True,
-            'use_success_loss': True,
-            'use_dual_stream': True,
-            'use_positional_encoding': True,
-            'use_metadata': False,
-            'include_theta': False,
-            'include_rotation_angle': False
-        }
         
-        # 7. No positional encoding
-        models['No_PositionalEncoding'] = {
-            'use_temporal_contrastive': True,
-            'use_completion_time_loss': True,
-            'use_rmsd_loss': True,
-            'use_success_loss': True,
-            'use_dual_stream': True,
-            'use_positional_encoding': False,
-            'use_metadata': True,
-            'include_theta': False,
-            'include_rotation_angle': False
-        }
         
-        # 8. Simple transformer (no dual stream)
-        models['No_DualStream'] = {
-            'use_temporal_contrastive': True,
-            'use_completion_time_loss': True,
-            'use_rmsd_loss': True,
-            'use_success_loss': True,
-            'use_dual_stream': False,
-            'use_positional_encoding': True,
-            'use_metadata': True,
-            'include_theta': False,
-            'include_rotation_angle': False
-        }
 
-        # 9. Plus Theta (direction angle appended as channel)
+        # 6. Plus Theta (direction angle appended as channel)
         models['Plus_Theta'] = {
             'use_temporal_contrastive': True,
             'use_completion_time_loss': True,
@@ -157,7 +121,7 @@ class AblationStudy:
             'include_rotation_angle': False
         }
 
-        # 10. Plus Theta + Rotation Angle
+        # 7. Plus Theta + Rotation Angle
         models['Plus_Theta_Rotation'] = {
             'use_temporal_contrastive': True,
             'use_completion_time_loss': True,
@@ -257,7 +221,7 @@ class AblationStudy:
         """
         Create an ablated model based on configuration
         """
-        class AblatedSTCRL(nn.Module):
+        class AblatedSMTLearner(nn.Module):
             def __init__(self, ablation_config, model_config):
                 super().__init__()
                 self.ablation_config = ablation_config
@@ -345,7 +309,7 @@ class AblationStudy:
                 
                 return encoded_traj, projected, decoded
         
-        return AblatedSTCRL(ablation_config, model_config)
+        return AblatedSMTLearner(ablation_config, model_config)
     
     def train_ablated_model(self, model, loss_fn, train_loader, val_loader, config):
         """
@@ -588,8 +552,8 @@ class AblationStudy:
         ax = axes[1, 1]
         
         # Calculate relative performance (normalized to full model)
-        if 'Full_STCRL' in results:
-            full_model_results = results['Full_STCRL']
+        if 'Full_SMT_Learner' in results:
+            full_model_results = results['Full_SMT_Learner']
             relative_performance = {}
             
             for model_name, model_results in results.items():
@@ -626,24 +590,21 @@ class AblationStudy:
         print("ABLATION STUDY SUMMARY FOR REBUTTAL")
         print("=" * 60)
         
-        if 'Full_STCRL' not in results:
-            print("Full STCRL model not found in results")
+        if 'Full_SMT_Learner' not in results:
+            print("Full SMTLearner model not found in results")
             return
         
-        full_model = results['Full_STCRL']
+        full_model = results['Full_SMT_Learner']
         
         print("\n1. COMPONENT IMPORTANCE ANALYSIS:")
         print("-" * 40)
         
         # Analyze each component's contribution
         component_analysis = {
-            'Contrastive Learning': ('No_Contrastive', 'Full_STCRL'),
-            'Completion Time Loss': ('Only_CompletionTime', 'Full_STCRL'),
-            'RMSD Loss': ('Only_RMSD', 'Full_STCRL'),
-            'Success Loss': ('Only_Success', 'Full_STCRL'),
-            'Metadata Embedding': ('No_Metadata', 'Full_STCRL'),
-            'Positional Encoding': ('No_PositionalEncoding', 'Full_STCRL'),
-            'Dual Stream': ('No_DualStream', 'Full_STCRL')
+            'Contrastive Learning': ('No_Contrastive', 'Full_SMT_Learner'),
+            'Completion Time Loss': ('Only_CompletionTime', 'Full_SMT_Learner'),
+            'RMSD Loss': ('Only_RMSD', 'Full_SMT_Learner'),
+            'Success Loss': ('Only_Success', 'Full_SMT_Learner')
         }
         
         for component, (ablated_model, full_model_name) in component_analysis.items():
@@ -675,35 +636,34 @@ class AblationStudy:
         
         if individual_results:
             print("\nIndividual loss component performance:")
-            full_results = results.get('STCRL_Full', {})
+            full_results = results.get('Full_SMT_Learner', {})
             for loss_name, loss_results in individual_results.items():
                 loss_type = loss_name.replace('Only_', '')
                 print(f"\n{loss_type} Loss Only:")
                 print(f"  Reconstruction MSE: {loss_results.get('reconstruction_mse', 0):.6f}")
                 print(f"  vs Full Model: {((loss_results.get('reconstruction_mse', 0) - full_results.get('reconstruction_mse', 0)) / full_results.get('reconstruction_mse', 1)) * 100:+.2f}%")
         
-        print("\n3. ARCHITECTURE COMPONENT ANALYSIS:")
+        print("\n3. AUXILIARY INPUT ANALYSIS:")
         print("-" * 40)
-        
-        arch_components = {
-            'Metadata Embedding': 'No_Metadata',
-            'Positional Encoding': 'No_PositionalEncoding',
-            'Dual Stream Processing': 'No_DualStream'
+
+        aux_inputs = {
+            'target direction (theta)': 'Plus_Theta',
+            'target direction + rotation angle': 'Plus_Theta_Rotation',
         }
-        
-        for component, ablated_model in arch_components.items():
-            if ablated_model in results:
-                ablated = results[ablated_model]
-                full_results = results.get('STCRL_Full', {})
-                print(f"\nWithout {component}:")
+
+        for component, variant in aux_inputs.items():
+            if variant in results:
+                ablated = results[variant]
+                full_results = results.get('Full_SMT_Learner', {})
+                print(f"\nWith {component}:")
                 print(f"  Reconstruction MSE: {ablated.get('reconstruction_mse', 0):.6f}")
-                print(f"  Performance degradation: {((ablated.get('reconstruction_mse', 0) - full_results.get('reconstruction_mse', 0)) / full_results.get('reconstruction_mse', 1)) * 100:+.2f}%")
-        
+                print(f"  Change vs full model: {((ablated.get('reconstruction_mse', 0) - full_results.get('reconstruction_mse', 0)) / full_results.get('reconstruction_mse', 1)) * 100:+.2f}%")
+
         print("\n4. KEY FINDINGS:")
         print("-" * 40)
         print("• Each contrastive loss component contributes to overall performance")
         print("• Multi-temporal objectives provide complementary learning signals")
-        print("• Architectural components (metadata, positional encoding) are essential")
+        print("• Single-cue objectives capture only part of the performance structure")
         print("• Full model achieves best balance across all evaluation metrics")
         
         print("\n" + "=" * 60)
@@ -903,9 +863,9 @@ def run_ablation_study_main(data_path: str = None,
         print(f"Train/Val/Test sizes: {len(aug_train_df)}/{len(aug_val_df)}/{len(aug_test_df)}")
 
         # Create datasets/loaders
-        train_dataset = STCRLModelFittingDataset(aug_train_df)
-        val_dataset = STCRLModelFittingDataset(aug_val_df)
-        test_dataset = STCRLModelFittingDataset(aug_test_df)
+        train_dataset = SMTLearnerModelFittingDataset(aug_train_df)
+        val_dataset = SMTLearnerModelFittingDataset(aug_val_df)
+        test_dataset = SMTLearnerModelFittingDataset(aug_test_df)
 
         train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=config['batch_size'], shuffle=False)
@@ -968,7 +928,7 @@ def run_ablation_study_main(data_path: str = None,
 if __name__ == "__main__":
     import argparse
     
-    parser = argparse.ArgumentParser(description='Run STCRL ablation study')
+    parser = argparse.ArgumentParser(description='Run SMTLearner ablation study')
     parser.add_argument('--data_path', type=str, default=None, help='Path to dataset')
     parser.add_argument('--epochs', type=int, default=30, help='Number of training epochs')
     parser.add_argument('--results_dir', type=str, default='./ablation_study_results', help='Results directory')

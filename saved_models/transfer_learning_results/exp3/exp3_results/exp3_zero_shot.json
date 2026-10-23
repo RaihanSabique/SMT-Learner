@@ -6,17 +6,20 @@
       "pretrain_cohort": "term",
       "pretrain_task": "bimanual+unimanual",
       "finetune_chain": [
-        {"dataset": "MSL", "cohort": "preterm"},
-        {"dataset": "MP", "cohort": "TD"},
-        {"dataset": "MP", "cohort": "UCP"}
+        {
+          "dataset": "MSL",
+          "cohort": "preterm"
+        },
+        {
+          "dataset": "MP",
+          "cohort": "TD"
+        },
+        {
+          "dataset": "MP",
+          "cohort": "UCP"
+        }
       ],
       "epochs_pretrain": 50
-    },
-    "target": {
-      "dataset": "MonkeyPR",
-      "task": "all_tasks",
-      "split": "test",
-      "zero_shot": true
     }
   },
   "metrics": {

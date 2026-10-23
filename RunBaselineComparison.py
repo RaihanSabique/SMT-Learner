@@ -1,6 +1,6 @@
 """
 Main script for running comprehensive baseline comparison for NeurIPS rebuttal
-This script trains baseline models and evaluates them against STCRL
+This script trains baseline models and evaluates them against SMTLearner
 """
 
 import torch
@@ -16,12 +16,12 @@ from typing import Dict, Any
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from STCRL.BaselineModels import create_baseline_models
-from STCRL.EvaluationFramework import ComprehensiveComparison, EvaluationMetrics, BaselineTrainer
-from STCRL.STCRLDataset import STCRLModelFittingDataset
-from STCRL.TransformerEncoder import STCRLTransformer
-from STCRL.TrainSTCRL import train_stcrl_model
-from STCRL.ContrastiveLossFunctions import MultiTemporalLoss
+from SMTLearner.BaselineModels import create_baseline_models
+from SMTLearner.EvaluationFramework import ComprehensiveComparison, EvaluationMetrics, BaselineTrainer
+from SMTLearner.SMTLearnerDataset import SMTLearnerModelFittingDataset
+from SMTLearner.TransformerEncoder import SMTLearnerTransformer
+from SMTLearner.TrainSMTLearner import train_smtlearner_model
+from SMTLearner.ContrastiveLossFunctions import MultiTemporalLoss
 from DataProcessing.Normalization import normalize_trajectory_sequence_3d
 
 
@@ -67,9 +67,9 @@ def load_and_prepare_data(data_path: str, test_split: float = 0.2, val_split: fl
     print(f"Data splits - Train: {len(train_df)}, Val: {len(val_df)}, Test: {len(test_df)}")
     
     # Create datasets
-    train_dataset = STCRLModelFittingDataset(train_df)
-    val_dataset = STCRLModelFittingDataset(val_df)
-    test_dataset = STCRLModelFittingDataset(test_df)
+    train_dataset = SMTLearnerModelFittingDataset(train_df)
+    val_dataset = SMTLearnerModelFittingDataset(val_df)
+    test_dataset = SMTLearnerModelFittingDataset(test_df)
     
     # Create data loaders
     batch_size = 32
@@ -192,21 +192,21 @@ def train_baseline_models(models: Dict, train_loader, val_loader, config: Dict):
     return trained_models, training_histories
 
 
-def train_stcrl_for_comparison(train_loader, val_loader, config: Dict):
+def train_smtlearner_for_comparison(train_loader, val_loader, config: Dict):
     """
-    Train STCRL model for comparison
+    Train SMTLearner model for comparison
     """
-    print("\\nTraining STCRL model...")
+    print("\\nTraining SMTLearner model...")
     
-    # Create dummy dataframe for STCRL training (it expects a DataFrame)
+    # Create dummy dataframe for SMTLearner training (it expects a DataFrame)
     # This is a workaround - in practice, you'd use your actual data
     dummy_df = create_dummy_dataset(len(train_loader.dataset) + len(val_loader.dataset))
     
     # Initialize loss function
     loss_fn = MultiTemporalLoss()
     
-    # Train STCRL
-    stcrl_model, optimizer, history = train_stcrl_model(
+    # Train SMTLearner
+    smtlearner_model, optimizer, history = train_smtlearner_model(
         df=dummy_df,
         loss_fn=loss_fn,
         hidden_dim=config['hidden_dim'],
@@ -218,8 +218,8 @@ def train_stcrl_for_comparison(train_loader, val_loader, config: Dict):
         early_stop_patience=config['early_stopping_patience']
     )
     
-    print("STCRL training completed")
-    return stcrl_model, history
+    print("SMTLearner training completed")
+    return smtlearner_model, history
 
 
 def run_comprehensive_comparison(data_path: str = None, 
@@ -276,12 +276,12 @@ def run_comprehensive_comparison(data_path: str = None,
         baseline_models, train_loader, val_loader, config
     )
     
-    # Train STCRL
-    print("\\n=== Training STCRL Model ===")
-    stcrl_model, stcrl_history = train_stcrl_for_comparison(train_loader, val_loader, config)
+    # Train SMTLearner
+    print("\\n=== Training SMTLearner Model ===")
+    smtlearner_model, smtlearner_history = train_smtlearner_for_comparison(train_loader, val_loader, config)
     
-    # Add STCRL to the models dictionary
-    all_models = {**trained_baselines, 'STCRL': stcrl_model}
+    # Add SMTLearner to the models dictionary
+    all_models = {**trained_baselines, 'SMTLearner': smtlearner_model}
     
     # Run comprehensive evaluation
     print("\\n=== Running Comprehensive Evaluation ===")
@@ -315,7 +315,7 @@ def run_comprehensive_comparison(data_path: str = None,
         
         # Save training histories
         histories_path = os.path.join(results_dir, 'training_histories.pkl')
-        all_histories = {**baseline_histories, 'STCRL': stcrl_history}
+        all_histories = {**baseline_histories, 'SMTLearner': smtlearner_history}
         pd.to_pickle(all_histories, histories_path)
         
         print(f"Results saved to {results_dir}")
@@ -334,36 +334,36 @@ def print_rebuttal_summary(results: Dict, comparison_table: pd.DataFrame):
     print("\\nKEY FINDINGS FOR REBUTTAL:")
     print("=" * 50)
     
-    # Find STCRL's performance
-    if 'STCRL' in results:
-        stcrl_results = results['STCRL']
+    # Find SMTLearner's performance
+    if 'SMTLearner' in results:
+        smtlearner_results = results['SMTLearner']
         
         print("\\n1. RECONSTRUCTION QUALITY:")
-        if 'reconstruction_mse' in stcrl_results:
-            print(f"   STCRL Reconstruction MSE: {stcrl_results['reconstruction_mse']:.6f}")
+        if 'reconstruction_mse' in smtlearner_results:
+            print(f"   SMTLearner Reconstruction MSE: {smtlearner_results['reconstruction_mse']:.6f}")
             
             # Compare with baselines
             for model_name, model_results in results.items():
-                if model_name != 'STCRL' and 'reconstruction_mse' in model_results:
-                    improvement = ((model_results['reconstruction_mse'] - stcrl_results['reconstruction_mse']) / 
+                if model_name != 'SMTLearner' and 'reconstruction_mse' in model_results:
+                    improvement = ((model_results['reconstruction_mse'] - smtlearner_results['reconstruction_mse']) / 
                                  model_results['reconstruction_mse']) * 100
                     print(f"   vs {model_name}: {improvement:+.2f}% improvement")
         
         print("\\n2. TEMPORAL CORRELATIONS:")
         for corr_type in ['completion_time', 'rmsd', 'success']:
-            if corr_type in stcrl_results:
-                print(f"   {corr_type.replace('_', ' ').title()} Correlation: {stcrl_results[corr_type]:.4f}")
+            if corr_type in smtlearner_results:
+                print(f"   {corr_type.replace('_', ' ').title()} Correlation: {smtlearner_results[corr_type]:.4f}")
         
         print("\\n3. CLUSTERING CONSISTENCY:")
         for cons_type in ['completion_time_consistency', 'rmsd_consistency', 'is_success_consistency']:
-            if cons_type in stcrl_results:
+            if cons_type in smtlearner_results:
                 metric_name = cons_type.replace('_consistency', '').replace('_', ' ').title()
-                print(f"   {metric_name} Consistency: {stcrl_results[cons_type]:.4f}")
+                print(f"   {metric_name} Consistency: {smtlearner_results[cons_type]:.4f}")
     
     print("\\n4. RANKING SUMMARY:")
     if 'reconstruction_mse_rank' in comparison_table.columns:
-        stcrl_rank = comparison_table.loc['STCRL', 'reconstruction_mse_rank']
-        print(f"   STCRL ranks #{int(stcrl_rank)} in reconstruction quality (lower MSE is better)")
+        smtlearner_rank = comparison_table.loc['SMTLearner', 'reconstruction_mse_rank']
+        print(f"   SMTLearner ranks #{int(smtlearner_rank)} in reconstruction quality (lower MSE is better)")
     
     print("\\n5. STATISTICAL SIGNIFICANCE:")
     print("   [Note: Implement statistical tests in your analysis]")
@@ -371,11 +371,11 @@ def print_rebuttal_summary(results: Dict, comparison_table: pd.DataFrame):
     
     print("\\n=" * 50)
     print("These results address the reviewer's concern about baseline comparisons.")
-    print("STCRL demonstrates superior performance across multiple evaluation metrics.")
+    print("SMTLearner demonstrates superior performance across multiple evaluation metrics.")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run comprehensive baseline comparison for STCRL')
+    parser = argparse.ArgumentParser(description='Run comprehensive baseline comparison for SMTLearner')
     parser.add_argument('--data_path', type=str, default=None, 
                        help='Path to the dataset file')
     parser.add_argument('--epochs', type=int, default=50, 

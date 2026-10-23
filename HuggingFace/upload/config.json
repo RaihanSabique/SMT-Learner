@@ -1,0 +1,12 @@
+{
+  "architecture": "SMTLearnerTransformer",
+  "seq_len": 512,
+  "input_dim": 3,
+  "hidden_dim": 64,
+  "nhead": 8,
+  "num_layers": 2,
+  "dropout": 0.1,
+  "metadata_dim": 1,
+  "num_parameters": 260704,
+  "source_checkpoint": "smtlearner_ucpmp_transfer.pt"
+}
