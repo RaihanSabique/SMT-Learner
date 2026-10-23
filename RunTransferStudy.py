@@ -5,11 +5,11 @@ import numpy as np
 import torch
 from typing import Dict, Tuple, Optional
 
-from STCRL.TrainSTCRL import train_stcrl_model
-from STCRL.TransferLearning.STCRLTransferLearning import STCRLTransferLearningRunner
-from STCRL.STCRLDataset import STCRLModelFittingDataset
-from STCRL.EvaluationFramework import EvaluationMetrics
-from STCRL.TransformerEncoder import STCRLTransformer
+from SMTLearner.TrainSMTLearner import train_smtlearner_model
+from SMTLearner.TransferLearning.SMTLearnerTransferLearning import SMTLearnerTransferLearningRunner
+from SMTLearner.SMTLearnerDataset import SMTLearnerModelFittingDataset
+from SMTLearner.EvaluationFramework import EvaluationMetrics
+from SMTLearner.TransformerEncoder import SMTLearnerTransformer
 
 ############################################################
 # Utility Functions
@@ -33,95 +33,13 @@ def enforce_canonical_normalization(df: pd.DataFrame) -> pd.DataFrame:
     if 'participant_id' in df.columns:
         df = df.copy()
         df['participant_id'], _ = pd.factorize(df['participant_id'])
-    # Preserve and factorize task_type if non-numeric (e.g., monkey dataset with Scott_2001_e1...e5)
+    # Preserve and factorize task_type if it is non-numeric
     if 'task_type' in df.columns:
         if not np.issubdtype(df['task_type'].dtype, np.number):
             df = df.copy()
             df['task_type_str'] = df['task_type']
             df['task_type'], _ = pd.factorize(df['task_type'])
 
-    # If this is a D2 (monkey) style dataframe with HandPos column, convert it to 'path'
-    if 'HandPos' in df.columns:
-        df = df.copy()
-        def handpos_to_path(handpos_val):
-            # Accept already-parsed sequences
-            if isinstance(handpos_val, (list, tuple, np.ndarray)):
-                arr = np.array(handpos_val)
-                # Common MATLAB shape (2, N): x row then y row
-                if arr.ndim == 2:
-                    if arr.shape[0] == 2 and arr.shape[1] >= 2:
-                        return list(zip(arr[0].astype(float), arr[1].astype(float)))
-                    if arr.shape[1] == 2:  # (N,2)
-                        return [tuple(map(float, pt)) for pt in arr]
-                # Fallback: flatten into pairs
-                flat = arr.flatten()
-                path_pairs = []
-                for i in range(0, len(flat) - 1, 2):
-                    try:
-                        path_pairs.append((float(flat[i]), float(flat[i+1])))
-                    except Exception:
-                        continue
-                return path_pairs
-            # String parsing expected like: "[x1 y1; x2 y2; ...]"
-            s = str(handpos_val).strip().strip('[]')
-            point_strings = [p for p in s.split(';') if p.strip()]
-            path = [(0,0)] # Initialize with dummy to avoid empty list
-            for pstr in point_strings:
-                # Replace commas with spaces, split on whitespace
-                coords = [c for c in pstr.replace(',', ' ').split() if c]
-                if len(coords) >= 2:
-                    try:
-                        x = float(coords[0]); y = float(coords[1])
-                        path.append((x, y))
-                    except Exception:
-                        continue
-            return path
-
-        if 'path' not in df.columns:
-            df['path'] = df['HandPos'].apply(handpos_to_path)
-        else:
-            # Repair any non-iterable or malformed path entries by re-parsing HandPos
-            def ensure_path(row):
-                val = row['path']
-                if isinstance(val, (list, tuple)) and len(val) > 0:
-                    first = val[0]
-                    if isinstance(first, (list, tuple)) and len(first) == 2:
-                        return val
-                return handpos_to_path(row['HandPos'])
-            df['path'] = df.apply(ensure_path, axis=1)
-
-    # Derive time_diff_ms from MATLAB-style Time column for D2-like inputs
-    if 'Time' in df.columns:
-        def matlab_time_to_array(matlab_str):
-            try:
-                if isinstance(matlab_str, (list, tuple, np.ndarray)):
-                    arr = np.array(matlab_str, dtype=float)
-                else:
-                    s = str(matlab_str).strip().strip('[]')
-                    # Split by semicolons primarily; fallback commas/newlines
-                    if ';' in s:
-                        parts = [p for p in s.split(';') if p != '']
-                    else:
-                        parts = [p for p in s.replace('\n', ',').split(',') if p != '']
-                    arr = np.array([float(val) for val in parts], dtype=float)
-                return arr * 1000.0
-            except Exception:
-                return np.array([])
-
-        df = df.copy()
-        df['time_diff_ms'] = df['Time'].apply(matlab_time_to_array)
-
-    if 'path' not in df.columns or 'time_diff_ms' not in df.columns:
-        raise ValueError("DataFrame must contain 'path' and 'time_diff_ms' columns for normalization.")
-    norm_trajs = []
-    for idx, row in df.iterrows():
-        try:
-            norm = normalize_trajectory_sequence_3d(row['path'], row['time_diff_ms'])
-        except Exception:
-            norm = np.array([])
-        norm_trajs.append(norm)
-    df = df.copy()
-    df['normalized_trajectory'] = norm_trajs
     return df
 
 def debug_print_norm_stats(df: pd.DataFrame, label: str, max_samples: int = 5):
@@ -172,9 +90,9 @@ def compute_zero_shot_pct_diff(zero_shot_loss: float, finetuned_loss: float) -> 
 ############################################################
 
 def pretrain_model(source_df: pd.DataFrame, save_prefix: str, hidden_dim=128, nhead=8, num_layers=3, epochs=25) -> Tuple[str, Dict]:
-    from STCRL.ContrastiveLossFunctions import MultiTemporalLoss
+    from SMTLearner.ContrastiveLossFunctions import MultiTemporalLoss
     loss_fn = MultiTemporalLoss()  # full multi-temporal loss
-    model, optimizer, history = train_stcrl_model(source_df, loss_fn, hidden_dim=hidden_dim, nhead=nhead, num_layers=num_layers, epochs=epochs, batch_size=32, val_split=0.1, early_stop_patience=5)
+    model, optimizer, history = train_smtlearner_model(source_df, loss_fn, hidden_dim=hidden_dim, nhead=nhead, num_layers=num_layers, epochs=epochs, batch_size=32, val_split=0.1, early_stop_patience=5)
     # Save model + architecture for TransferLearningRunner compatibility
     arch = {
         'seq_len': 512,
@@ -261,7 +179,7 @@ def write_evaluation_report(save_dir: str,
 # Experiment Scenarios
 ############################################################
 
-def experiment_1_pretrain_D1_test_D2(D1_path: str, D2_path: str, out_dir: str, epochs: int) -> Dict:
+def experiment_1_pretrain_D1_finetune_D2(D1_path: str, D2_path: str, out_dir: str, epochs: int) -> Dict:
     ensure_dir(out_dir)
     D1 = enforce_canonical_normalization(load_dataset(D1_path))
     D2 = enforce_canonical_normalization(load_dataset(D2_path))
@@ -278,9 +196,9 @@ def experiment_1_pretrain_D1_test_D2(D1_path: str, D2_path: str, out_dir: str, e
         'tested_on': ['D1','D2'],
         'metrics': ['total_loss','reconstruction_loss','completion_time_loss','task_type_loss','rmsd_loss','success_loss']
     }
-    write_pretrain_history(out_dir, 'exp1_pretrain_D1', 'Pretrain on D1 (human) full dataset; evaluate zero-shot on D2 (non-human primate). No fine-tuning on target.', pretrain_cfg, None, eval_protocol, history)
+    write_pretrain_history(out_dir, 'exp1_pretrain_D1', 'EXP1: pre-train and test on MSL (D1); evaluate on MP (D2) before fine-tuning on the target.', pretrain_cfg, None, eval_protocol, history)
 
-    runner = STCRLTransferLearningRunner(source_model_path=save_prefix, save_dir=ensure_dir(os.path.join(out_dir, 'exp1_results')))
+    runner = SMTLearnerTransferLearningRunner(source_model_path=save_prefix, save_dir=ensure_dir(os.path.join(out_dir, 'exp1_results')))
     # Zero-shot on D2
     zero_shot_D2 = runner.run_zero_shot_transfer(D2)
     write_evaluation_report(os.path.join(out_dir, 'exp1_results'), 'exp1_D2_zero_shot', {'pretrain_dataset': 'D1', 'pretrain_task': 'all', 'epochs': epochs}, {'dataset': 'D2', 'task': 'all'}, zero_shot_D2, zero_shot=True)
@@ -289,9 +207,18 @@ def experiment_1_pretrain_D1_test_D2(D1_path: str, D2_path: str, out_dir: str, e
     zero_shot_D1 = runner.run_zero_shot_transfer(D1_holdout if len(D1_holdout) else D1)
     write_evaluation_report(os.path.join(out_dir, 'exp1_results'), 'exp1_D1_zero_shot_holdout', {'pretrain_dataset': 'D1', 'pretrain_task': 'all', 'epochs': epochs}, {'dataset': 'D1', 'task': 'holdout'}, zero_shot_D1, zero_shot=True)
 
+    # EXP1 fine-tunes on the MP target and tests there; the evaluation above is the
+    # pre-fine-tuning measurement reported as "Pretraining" in Suppl. TABLE II.
+    ft_model, ft_history, ft_D2_eval = runner.run_cross_task_transfer(D2, epochs=max(1, epochs // 2))
+    if isinstance(ft_history, dict):
+        write_pretrain_history(out_dir, 'exp1_finetune_D2', 'EXP1: fine-tune the MSL-pretrained model on MP and test on held-out MP participants.', {'datasets': ['D2'], 'tasks': ['all'], 'cohorts': ['TD', 'UCP'], 'epochs': max(1, epochs // 2)}, None, {'zero_shot': [], 'tested_on': ['D2'], 'metrics': ['total_loss', 'reconstruction_loss', 'completion_time_loss', 'task_type_loss', 'rmsd_loss', 'success_loss']}, ft_history)
+    write_evaluation_report(os.path.join(out_dir, 'exp1_results'), 'exp1_D2_finetuned_test', {'pretrain_dataset': 'D1', 'pretrain_task': 'all', 'epochs': epochs}, {'dataset': 'D2', 'task': 'all'}, ft_D2_eval, zero_shot=False, use_epochs_normalized=True)
+
     return {
         'zero_shot_D1': zero_shot_D1,
-        'zero_shot_D2': zero_shot_D2
+        'zero_shot_D2': zero_shot_D2,
+        'fine_tuned_D2_eval': ft_D2_eval,
+        'cross_task_history': ft_history
     }
 
 def experiment_2_cross_task(D1_path: str, D2_path: str, out_dir: str, epochs: int) -> Dict:
@@ -304,9 +231,9 @@ def experiment_2_cross_task(D1_path: str, D2_path: str, out_dir: str, epochs: in
     D1_unimanual = filter_unimanual(D1)
     save_prefix = os.path.join(out_dir, 'exp2_pretrain_D1_unimanual')
     source_model, history = pretrain_model(D1_unimanual, save_prefix, epochs=epochs)
-    write_pretrain_history(out_dir, 'exp2_pretrain_D1_unimanual', 'Pretrain on D1 unimanual tasks; evaluate on bimanual and cross-species tasks.', {'datasets': ['D1'], 'tasks': ['unimanual'], 'cohorts': ['term','preterm'], 'epochs': epochs}, None, {'zero_shot': ['D1_bimanual','D2_tasks'], 'tested_on': ['D1','D2'], 'metrics': ['total_loss','reconstruction_loss','completion_time_loss','task_type_loss','rmsd_loss','success_loss']}, history)
+    write_pretrain_history(out_dir, 'exp2_pretrain_D1_unimanual', 'EXP2 cross-task: pre-train on the MSL complex unimanual task; fine-tune on the MP simple unimanual task.', {'datasets': ['D1'], 'tasks': ['unimanual'], 'cohorts': ['term','preterm'], 'epochs': epochs}, None, {'zero_shot': ['D1_bimanual','D2_tasks'], 'tested_on': ['D1','D2'], 'metrics': ['total_loss','reconstruction_loss','completion_time_loss','task_type_loss','rmsd_loss','success_loss']}, history)
 
-    runner = STCRLTransferLearningRunner(source_model_path=save_prefix, save_dir=ensure_dir(os.path.join(out_dir,'exp2_results')))
+    runner = SMTLearnerTransferLearningRunner(source_model_path=save_prefix, save_dir=ensure_dir(os.path.join(out_dir,'exp2_results')))
 
     # Zero-shot on D1 bimanual
     D1_bimanual = filter_bimanual(D1)
@@ -342,7 +269,7 @@ def experiment_3_cross_subject(D1_path: str, D2_path: str, out_dir: str, epochs:
     source_model, history = pretrain_model(D1_term, save_prefix, epochs=epochs)
     write_pretrain_history(out_dir, 'exp3_pretrain_D1_term', 'Pretrain on D1 Term cohort; fine-tune on Preterm for cross-subject transfer.', {'datasets': ['D1'], 'tasks': ['all'], 'cohorts': ['Term'], 'epochs': epochs}, {'phase': 'cross_subject', 'target_cohorts': ['Preterm'], 'epochs': 10}, {'zero_shot': ['D2'], 'tested_on': ['D1_preterm','D2'], 'metrics': ['total_loss','reconstruction_loss','completion_time_loss','task_type_loss','rmsd_loss','success_loss']}, history)
 
-    runner = STCRLTransferLearningRunner(source_model_path=save_prefix, save_dir=ensure_dir(os.path.join(out_dir,'exp3_results')))
+    runner = SMTLearnerTransferLearningRunner(source_model_path=save_prefix, save_dir=ensure_dir(os.path.join(out_dir,'exp3_results')))
 
     D1_preterm = filter_cohort(D1, 'Preterm')
     # Fine-tune: reuse cross-subject transfer API on preterm subset
@@ -355,11 +282,11 @@ def experiment_3_cross_subject(D1_path: str, D2_path: str, out_dir: str, epochs:
     zero_shot_D2 = runner.run_zero_shot_transfer(D2)
     write_evaluation_report(os.path.join(out_dir,'exp3_results'), 'exp3_D2_zero_shot', {'pretrain_dataset': 'D1_term', 'pretrain_task': 'all', 'epochs': epochs}, {'dataset': 'D2', 'task': 'all'}, zero_shot_D2, zero_shot=True)
     # Evaluate fine-tuned model on D1_preterm and D2
-    from STCRL.TransferLearning.TransferLearningFramework import TransferLearningFramework
+    from SMTLearner.TransferLearning.TransferLearningFramework import TransferLearningFramework
     framework = runner.transfer_framework
-    from STCRL.STCRLDataset import STCRLModelFittingDataset
-    D1_preterm_dataset = STCRLDataset = STCRLModelFittingDataset(D1_preterm)
-    D2_dataset = STCRLModelFittingDataset(D2)
+    from SMTLearner.SMTLearnerDataset import SMTLearnerModelFittingDataset
+    D1_preterm_dataset = SMTLearnerDataset = SMTLearnerModelFittingDataset(D1_preterm)
+    D2_dataset = SMTLearnerModelFittingDataset(D2)
     ft_D1_eval = framework.evaluate_transfer_performance(cs_model, D1_preterm_dataset)
     ft_D2_eval = framework.evaluate_transfer_performance(cs_model, D2_dataset)
     write_evaluation_report(os.path.join(out_dir,'exp3_results'), 'exp3_D1_preterm_finetuned_test', {'pretrain_dataset': 'D1_term', 'pretrain_task': 'all', 'epochs': epochs}, {'dataset': 'D1', 'task': 'Preterm'}, ft_D1_eval, zero_shot=False, use_epochs_normalized=True)
@@ -385,7 +312,7 @@ def experiment_4_adaptive(D1_path: str, D2_path: str, out_dir: str, epochs: int)
     source_model, history = pretrain_model(D1_term_unimanual, save_prefix, epochs=epochs)
     write_pretrain_history(out_dir, 'exp4_pretrain_D1_term_unimanual', 'Pretrain on D1 Term cohort unimanual; adaptive sequential fine-tuning.', {'datasets': ['D1'], 'tasks': ['unimanual'], 'cohorts': ['Term'], 'epochs': epochs}, {'phase': 'adaptive', 'sequence': ['Preterm','bimanual'], 'epochs_each': 8}, {'zero_shot': ['D2_initial'], 'tested_on': ['D1_final','D2_final'], 'metrics': ['total_loss','reconstruction_loss','completion_time_loss','task_type_loss','rmsd_loss','success_loss']}, history)
 
-    runner = STCRLTransferLearningRunner(source_model_path=save_prefix, save_dir=ensure_dir(os.path.join(out_dir,'exp4_results')))
+    runner = SMTLearnerTransferLearningRunner(source_model_path=save_prefix, save_dir=ensure_dir(os.path.join(out_dir,'exp4_results')))
 
     # Sequential adaptation: first Preterm cohort, then bimanual tasks
     D1_preterm = filter_cohort(D1, 'Preterm')
@@ -403,11 +330,11 @@ def experiment_4_adaptive(D1_path: str, D2_path: str, out_dir: str, epochs: int)
         write_pretrain_history(out_dir, 'exp4_finetune_D1_bimanual', 'Adaptive phase 2: cross-task fine-tune on bimanual tasks.', {'datasets': ['D1'], 'tasks': ['bimanual'], 'cohorts': ['Term','Preterm'], 'epochs': 8}, None, {'zero_shot': [], 'tested_on': ['D1_bimanual'], 'metrics': ['total_loss','reconstruction_loss','completion_time_loss','task_type_loss','rmsd_loss','success_loss']}, ct_history)
 
     # Evaluate final adaptive model
-    from STCRL.TransferLearning.TransferLearningFramework import TransferLearningFramework
+    from SMTLearner.TransferLearning.TransferLearningFramework import TransferLearningFramework
     framework = runner.transfer_framework
-    from STCRL.STCRLDataset import STCRLModelFittingDataset
-    D1_dataset_final = STCRLModelFittingDataset(D1)
-    D2_dataset_final = STCRLModelFittingDataset(D2)
+    from SMTLearner.SMTLearnerDataset import SMTLearnerModelFittingDataset
+    D1_dataset_final = SMTLearnerModelFittingDataset(D1)
+    D2_dataset_final = SMTLearnerModelFittingDataset(D2)
     adaptive_D1_eval = framework.evaluate_transfer_performance(ct_model, D1_dataset_final)
     adaptive_D2_eval = framework.evaluate_transfer_performance(ct_model, D2_dataset_final)
     write_evaluation_report(os.path.join(out_dir,'exp4_results'), 'exp4_D1_adaptive_final_test', {'pretrain_dataset': 'D1_term_unimanual', 'pretrain_task': 'unimanual', 'epochs': epochs}, {'dataset': 'D1', 'task': 'all_final'}, adaptive_D1_eval, zero_shot=False, use_epochs_normalized=True)
@@ -431,13 +358,18 @@ def experiment_4_adaptive(D1_path: str, D2_path: str, out_dir: str, epochs: int)
 def run_all_transfer_experiments(D1_path: str, D2_path: str, output_root: str, pretrain_epochs: int) -> Dict:
     ensure_dir(output_root)
     results = {}
-    results['exp1'] = experiment_1_pretrain_D1_test_D2(D1_path, D2_path, os.path.join(output_root, 'exp1'), pretrain_epochs)
+    results['exp1'] = experiment_1_pretrain_D1_finetune_D2(D1_path, D2_path, os.path.join(output_root, 'exp1'), pretrain_epochs)
     results['exp2'] = experiment_2_cross_task(D1_path, D2_path, os.path.join(output_root, 'exp2'), pretrain_epochs)
     results['exp3'] = experiment_3_cross_subject(D1_path, D2_path, os.path.join(output_root, 'exp3'), pretrain_epochs)
     results['exp4'] = experiment_4_adaptive(D1_path, D2_path, os.path.join(output_root, 'exp4'), pretrain_epochs)
 
-    # Compute representative zero-shot pct diff where possible
-    # Example: exp3 fine-tuned vs zero-shot D2
+    # Compute representative pre-finetuning vs fine-tuned pct diff where possible
+    try:
+        results['exp1']['zero_shot_pct_diff'] = compute_zero_shot_pct_diff(
+            results['exp1']['zero_shot_D2']['total_loss'],
+            results['exp1']['fine_tuned_D2_eval']['total_loss'])
+    except Exception:
+        results['exp1']['zero_shot_pct_diff'] = None
     try:
         zs_loss = results['exp3']['zero_shot_D2']['total_loss']
         ft_loss = results['exp3']['fine_tuned_D2_eval']['total_loss']
@@ -455,8 +387,8 @@ def run_all_transfer_experiments(D1_path: str, D2_path: str, output_root: str, p
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Run comprehensive transfer experiments for rebuttal.')
-    parser.add_argument('--D1', type=str, required=True, help='Path to human dataset CSV')
-    parser.add_argument('--D2', type=str, required=True, help='Path to monkey dataset CSV')
+    parser.add_argument('--D1', type=str, required=True, help='Path to MSL (motor skill learning) dataset CSV')
+    parser.add_argument('--D2', type=str, required=True, help='Path to MP (UCP motor performance) dataset CSV')
     parser.add_argument('--out', type=str, default='transfer_learning_results', help='Output directory')
     parser.add_argument('--epochs', type=int, default=25, help='Base pretraining epochs')
     args = parser.parse_args()

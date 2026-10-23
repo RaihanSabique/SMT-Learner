@@ -1,0 +1,9 @@
+dataset,contrast,cohens_d,n1,n2
+MSL,Preterm vs Term (early),0.43966976365683413,18,50
+MSL,Preterm vs Term (late),0.5335911967182022,18,50
+MSL,"early vs late (Preterm, paired)",2.9355155494005256,18,18
+MSL,"early vs late (Term, paired)",2.809481859026503,50,50
+UCPMP,TD vs UCP (early),-0.8783571359772221,40,10
+UCPMP,TD vs UCP (late),-1.4408744859758489,40,10
+UCPMP,"early vs late (TD, paired)",1.6283017002785862,40,40
+UCPMP,"early vs late (UCP, paired)",0.8745856301818922,10,10

@@ -17,28 +17,28 @@ def test_imports():
     print("Testing imports...")
     
     try:
-        from STCRL.BaselineModels import create_baseline_models
+        from SMTLearner.BaselineModels import create_baseline_models
         print("✓ BaselineModels imported successfully")
     except ImportError as e:
         print(f"✗ Failed to import BaselineModels: {e}")
         return False
     
     try:
-        from STCRL.EvaluationFramework import ComprehensiveComparison, EvaluationMetrics
+        from SMTLearner.EvaluationFramework import ComprehensiveComparison, EvaluationMetrics
         print("✓ EvaluationFramework imported successfully")
     except ImportError as e:
         print(f"✗ Failed to import EvaluationFramework: {e}")
         return False
     
     try:
-        from STCRL.STCRLDataset import STCRLModelFittingDataset
-        print("✓ STCRLDataset imported successfully")
+        from SMTLearner.SMTLearnerDataset import SMTLearnerModelFittingDataset
+        print("✓ SMTLearnerDataset imported successfully")
     except ImportError as e:
-        print(f"✗ Failed to import STCRLDataset: {e}")
+        print(f"✗ Failed to import SMTLearnerDataset: {e}")
         return False
     
     try:
-        from STCRL.TransformerEncoder import STCRLTransformer
+        from SMTLearner.TransformerEncoder import SMTLearnerTransformer
         print("✓ TransformerEncoder imported successfully")
     except ImportError as e:
         print(f"✗ Failed to import TransformerEncoder: {e}")
@@ -51,7 +51,7 @@ def test_model_creation():
     print("\nTesting model creation...")
     
     try:
-        from STCRL.BaselineModels import create_baseline_models
+        from SMTLearner.BaselineModels import create_baseline_models
         models = create_baseline_models(input_dim=3, hidden_dim=64, embedding_dim=32)
         print(f"✓ Created {len(models)} baseline models")
         
@@ -96,8 +96,8 @@ def test_dummy_data():
         print(f"✓ Created dummy dataset with {len(df)} samples")
         
         # Test dataset creation
-        from STCRL.STCRLDataset import STCRLModelFittingDataset
-        dataset = STCRLModelFittingDataset(df)
+        from SMTLearner.SMTLearnerDataset import SMTLearnerModelFittingDataset
+        dataset = SMTLearnerModelFittingDataset(df)
         print(f"✓ Created dataset with {len(dataset)} items")
         
         # Test data loading
@@ -115,7 +115,7 @@ def test_evaluation_metrics():
     print("\nTesting evaluation metrics...")
     
     try:
-        from STCRL.EvaluationFramework import EvaluationMetrics
+        from SMTLearner.EvaluationFramework import EvaluationMetrics
         evaluator = EvaluationMetrics()
         
         # Create dummy trajectories
@@ -169,7 +169,7 @@ def test_device_setup():
 def main():
     """Run all tests"""
     print("=" * 60)
-    print("STCRL EVALUATION FRAMEWORK TEST")
+    print("SMTLearner EVALUATION FRAMEWORK TEST")
     print("=" * 60)
     
     tests = [
@@ -208,7 +208,7 @@ def main():
         print("\nCommon fixes:")
         print("1. Install missing packages: pip install torch pandas matplotlib seaborn scikit-learn")
         print("2. Check Python path and module imports")
-        print("3. Verify STCRL module structure")
+        print("3. Verify SMTLearner module structure")
     
     print("=" * 60)
     

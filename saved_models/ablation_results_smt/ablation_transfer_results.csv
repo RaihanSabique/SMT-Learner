@@ -1,0 +1,5 @@
+,reconstruction_mse,endpoint_error,curvature_error,completion_time,rmsd,success
+Adaptive_Transfer,0.0010,0.005,1.720,0.860,0.910,0.955
+No_Transfer,0.0058,0.053,21.010,0.756,0.423,0.912
+Cross_Task_Only,0.0009,0.046,3.890,0.834,0.501,0.945
+Cross_Subject_Only,0.0009,0.046,3.890,0.817,0.487,0.938
